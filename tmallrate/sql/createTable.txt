@@ -1,0 +1,19 @@
+--
+-- 表的结构 `tmall_rate`
+--
+
+CREATE TABLE IF NOT EXISTS `tmall_rate` (
+  `product_id` varchar(64) NOT NULL COMMENT '产品id',
+  `rate_id` varchar(64) NOT NULL COMMENT '评价id',
+  `user_nickname` varchar(64) NOT NULL COMMENT '用户昵称',
+  `user_name_star_flag` varchar(4) NOT NULL COMMENT '昵称类型（有星号=0，无星号=1）',
+  `rate_content` text NOT NULL COMMENT '评价',
+  `rate_content_time` varchar(20) NOT NULL COMMENT '评论时间',
+  `rate_content_append` text NOT NULL COMMENT '追加评论',
+  `rate_append_time` varchar(20) NOT NULL COMMENT ' 追加评论时间',
+  `shop_url` varchar(1024) NOT NULL COMMENT '店铺url',
+  `is_decoration` varchar(8) NOT NULL COMMENT '是否装修类',
+  PRIMARY KEY (`product_id`,`rate_id`),
+  KEY `shop_url` (`shop_url`(255)),
+  KEY `product_id` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='tmall评价表';

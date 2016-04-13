@@ -1,0 +1,22 @@
+--
+-- 表的结构 `tmall_shop`
+--
+
+CREATE TABLE IF NOT EXISTS `tmall_shop` (
+  `shop_id` varchar(64) NOT NULL COMMENT '店铺id（user_id）',
+  `brand_id` varchar(64) NOT NULL COMMENT '品牌id',
+  `category_id` varchar(64) NOT NULL COMMENT '分类ID',
+  `shop_type` varchar(64) NOT NULL COMMENT '店铺类型，旗舰店/专营店/专卖店',
+  `shop_name` varchar(64) NOT NULL COMMENT '店铺名称',
+  `company_name` varchar(64) NOT NULL COMMENT '公司名称',
+  `shop_area` varchar(128) NOT NULL COMMENT '所在地区',
+  `shop_logo` varchar(64) NOT NULL COMMENT 'logo同品牌logo一致',
+  `shop_commodity_num` varchar(64) NOT NULL COMMENT '商品数量',
+  `description_consist_score` varchar(16) NOT NULL COMMENT '描述相符得分',
+  `description_consist_cmp` varchar(64) NOT NULL COMMENT '同业对比',
+  `service_attitude_score` varchar(16) NOT NULL COMMENT '服务态度得分',
+  `service_attitude_cmp` varchar(64) NOT NULL COMMENT '同业对比',
+  `logistics_service_score` varchar(16) NOT NULL COMMENT '物流服务得分',
+  `logistics_service_cmp` varchar(64) NOT NULL COMMENT '同业对比',
+  PRIMARY KEY (`shop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

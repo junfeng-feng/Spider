@@ -1,0 +1,4 @@
+/jcmd/img/*
+/baike/img/*
+*.pyc
+*.log

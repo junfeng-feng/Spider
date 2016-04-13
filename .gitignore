@@ -1,0 +1,5 @@
+/jcmd/img/*
+/baike/img/*
+*.pyc
+*.log
+*.jpg
