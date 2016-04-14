@@ -13,7 +13,7 @@ from scrapy.item import Item
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-from askjia.items import AskjiaItem
+from jiuzheng.items import JiuzhengItem
 
 logging.basicConfig(level=logging.INFO,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
@@ -41,12 +41,13 @@ class SpiderTmallShop(Spider):
     
     def parse(self, response):
         select = Selector(response)
-        item = AskjiaItem()
+        item = JiuzhengItem()
+        
         question_id = self.questionIdPatten.findall(response.url)[0]
         question_id = question_id[2:]
         item["question_id"] = question_id
         
-        item["question_title"] = "".join(select.css(".timu_text").xpath(".//h1/text()").extract()).strip()
+        item["question_title"] = select.css(".ask-detail").xpath("./h3/text()").extract()[0]
         
         
         try:    
