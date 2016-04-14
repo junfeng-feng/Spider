@@ -1,0 +1,41 @@
+--
+-- 表的结构 `ask_jiuzheng_question`
+--
+
+CREATE TABLE IF NOT EXISTS `ask_jiuzheng_question` (
+  `question_id` varchar(64) NOT NULL,
+  `question_title` varchar(256)  ,
+  `question_category` varchar(64)  ,
+  `question_description` text  ,
+  `question_img` varchar(64)   COMMENT '图片',
+  PRIMARY KEY (`question_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='jia问答';
+
+--
+-- 转存表中的数据 `ask_jiuzheng_question`
+--
+
+INSERT INTO `ask_jiuzheng_question` (`question_id`, `question_title`, `question_category`, `question_description`, `question_img`) VALUES
+('1', '1', '1', '1', '1');
+
+
+
+--
+-- 表的结构 `ask_jiuzheng_answer`
+--
+
+CREATE TABLE IF NOT EXISTS `ask_jiuzheng_answer` (
+  `answer_id` varchar(64) NOT NULL,
+  `question_id` varchar(64)  NULL,
+  `answer_content` text  NULL,
+  `answer_img` varchar(64) NULL,
+  `is_best` varchar(8)  NULL,
+  PRIMARY KEY (`answer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 转存表中的数据 `ask_jiuzheng_answer`
+--
+
+INSERT INTO `ask_jiuzheng_answer` (`answer_id`, `question_id`, `answer_content`, `answer_img`, `is_best`) VALUES
+('1', '1', '1', '1', '1');
