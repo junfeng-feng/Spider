@@ -7,9 +7,9 @@ import logging
 class JiuzhengPipeline(object):
     def __init__(self, dbargs):
         self.dbargs = dbargs
-        self.insertQuestionSql = r"""INSERT INTO `ask_askjia_question`  (`question_id`, `question_title`, `question_category`, `question_description`, `question_img`) VALUES
+        self.insertQuestionSql = r"""INSERT INTO `ask_jiuzheng_question`  (`question_id`, `question_title`, `question_category`, `question_description`, `question_img`) VALUES
 (%s, %s, %s, %s, %s);"""
-        self.insertAnswerSql = r"""INSERT INTO `ask_askjia_answer` (`answer_id`, `question_id`, `answer_content`, `answer_img`, `is_best`) VALUES
+        self.insertAnswerSql = r"""INSERT INTO `ask_jiuzheng_answer` (`answer_id`, `question_id`, `answer_content`, `answer_img`, `is_best`) VALUES
 (%s, %s, %s, %s, %s);"""
     
     def open_spider(self, spider):
@@ -39,32 +39,25 @@ class JiuzhengPipeline(object):
     
     def insertTmallShopSql(self, tx, item):
         if item["is_question"] == "yes":
-            image_src = ""
-            if len(item["images"]) > 0:
-                image_src = "/ask/jia" + item["images"][0]["path"][4:]
-
             try:
                 tx.execute(self.insertQuestionSql,
                        (item["question_id"],
                         item["question_title"],
                         item["question_category"],
                         item["question_description"],
-                        image_src
+                        ""
                         ))
             except Exception, e:
                 print e
             pass
+        
         else:
-            image_src = ""
-            if len(item["images"]) > 0:
-                image_src = "/ask/jia" + item["images"][0]["path"][4:]
-            
             try:
                 tx.execute(self.insertAnswerSql,
                        (item["answer_id"],
                         item["question_id"],
                         item["answer_content"].replace("\n",""),
-                        image_src,
+                        "",
                         item["is_best"],
                         ))
             except Exception, e:

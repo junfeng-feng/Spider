@@ -26,84 +26,76 @@ class SpiderTmallShop(Spider):
     
     allowed_domain = ['jiuzheng.com']
     start_urls = [
-                "http://ask.jia.com/a-812082.html",
-                  "http://ask.jia.com/a-217678.html",
+                  "http://www.jiuzheng.com/ask-detail/id-48534.html",
+                  "http://www.jiuzheng.com/ask-detail/id-37319.html",
                   ]
 
-    for id in xrange(1007, 100000):#todo
-        start_urls.append("http://ask.jia.com/a-%s.html" % id)
+    for id in xrange(1, 1000):  # todo
+        start_urls.append("http://www.jiuzheng.com/ask-detail/id-%s.html" % id)
         
     def __init__(self):
-        self.questionIdPatten = re.compile("a-[0-9]+")
-        
-        self.pageUrl = "http://www.to8to.com/ask/k%s-%s.html"
+        self.questionIdPatten = re.compile("id-[0-9]+")
         pass
-    
+
     def parse(self, response):
         select = Selector(response)
         item = JiuzhengItem()
         
         question_id = self.questionIdPatten.findall(response.url)[0]
-        question_id = question_id[2:]
+        question_id = question_id[3:]
         item["question_id"] = question_id
         
         item["question_title"] = select.css(".ask-detail").xpath("./h3/text()").extract()[0]
         
-        
         try:    
             # optinoal
-            item["question_description"] = "".join(select.css(".timu_buchong").xpath(".//text()").extract()[2:]).strip()
+            item["question_description"] = select.css(".ask-sub-info")[0].extract()[26:-6].strip()
             pass    
         except Exception, e:
             item["question_description"] = ""
             print e
         
-        item["image_urls"] = []
-        try:    
-            # optional
-            question_img_url = select.css(".ducecon_img").xpath(".//img/@src").extract()[0]
-            item["image_urls"].append(question_img_url)
-            pass    
-        except Exception, e:
-            print e            
-        pass
         item["question_category"] = ""
         try:
-            item["question_category"] = ">".join(select.css(".ask6new_mbx").xpath(".//dt/a/text()").extract())
+            item["question_category"] = ">".join(select.css(".breadcrumb-arrow").xpath(".//li/a/text()")[2:].extract())
             pass
         except Exception, e:
-            print e            
+            print e
+            
         item["is_question"] = "yes"
         yield item
+        
         item = copy.deepcopy(item)
-        item["question_category"] =""
+        item["question_category"] = ""
         item["question_description"] = ""
         item["question_title"] = ""
-        item["image_urls"] = []
         
         
-        #best_answer
+        # best_answer
+        bestFlag = False
         try:
             item["answer_id"] = str(uuid.uuid1())
-            item["answer_content"] =  select.css(".duce_con_ycn")[0].css(".con_text2")[0].extract()[30:-4]
+            item["answer_content"] = select.css(".optimum-box").xpath(".//div/div[@class='detail-cont']").extract()[0][25:-6].strip()
             item["is_best"] = "yes"
             
             item["is_question"] = "no"
-            item["image_urls"] = []
+            bestFlag = True
             yield item
             item = copy.deepcopy(item)
         except Exception, e:
             print e            
          
-        #other answers
-        other_answers_list = select.css(".duce_con")
+        # other answers
+        other_answers_list = select.css(".detail-cont")
+        if bestFlag:
+            other_answers_list = other_answers_list[1:]  # 如果有最佳答案，那么排除第一个最佳答案
+        
         for other_answer in other_answers_list:
             item["answer_id"] = str(uuid.uuid1())
-            item["answer_content"] = other_answer.css(".con_text2")[0].extract()[30:-4]
+            item["answer_content"] = other_answer.extract()[25:-6].strip()
             item["is_best"] = "no"
             
             item["is_question"] = "no"
-            item["image_urls"] = []
             yield item
             item = copy.deepcopy(item)
             pass

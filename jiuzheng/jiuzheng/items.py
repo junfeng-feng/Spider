@@ -24,6 +24,6 @@ class JiuzhengItem(scrapy.Item):
     imageStatus = scrapy.Field()
     
     # images
-    image_urls = scrapy.Field()
-    images = scrapy.Field()
+#     image_urls = scrapy.Field()
+#     images = scrapy.Field()
     pass

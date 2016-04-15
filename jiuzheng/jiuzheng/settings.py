@@ -31,5 +31,5 @@ DOWNLOAD_DELAY = 0.1
 COOKIES_ENABLED=False
 
 #images
-IMAGES_STORE = r'D:\ProgramingIDE\workspace\SuperSpider\jiuzheng\img'
-IMAGES_EXPIRES = 90
+# IMAGES_STORE = r'D:\ProgramingIDE\workspace\SuperSpider\jiuzheng\img'
+# IMAGES_EXPIRES = 90
