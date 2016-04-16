@@ -31,7 +31,7 @@ class SpiderTmallShop(Spider):
                 "http://www.to8to.com/ask/k866853.html",
                   ]
 
-    for id in xrange(0, 1000000):
+    for id in xrange(0, 100):
         start_urls.append("http://www.to8to.com/ask/k%s.html" % id)
         
     def __init__(self):
@@ -79,7 +79,7 @@ class SpiderTmallShop(Spider):
         item["imageStatus"] = {}
         item["image_urls"] = []
         try:
-            question_image_url = select.css(".ask_qustion").xpath(".//img/@src").extract()[0]
+            question_image_url = select.css(".ask_qustion")[0].xpath(".//img/@src").extract()[0]
             item["image_urls"].append(question_image_url)
             
             item["imageStatus"] = {question_id:question_image_url}
@@ -119,7 +119,7 @@ class SpiderTmallShop(Spider):
             item["is_best"] = "yes"
             # 如果最佳答案有图片
             try:
-                image_url = "http://www.to8to.com" + select.css(".best_answer").xpath("./img/@src")[0].extract()
+                image_url = "http://www.to8to.com" + select.css(".best_answer").xpath(".//img/@src")[0].extract()
                 item["image_urls"].append(image_url)
                 
                 item["imageStatus"][item["answer_id"]] = image_url
@@ -146,7 +146,7 @@ class SpiderTmallShop(Spider):
                 item["is_best"] = "no"
                 
                 try:
-                    image_url = "http://www.to8to.com" + li.xpath("./img/@src")[0].extract()
+                    image_url = "http://www.to8to.com" + li.xpath(".//img/@src")[0].extract()
                     item["image_urls"].append(image_url)
                     
                     item["imageStatus"][item["answer_id"]] = image_url
