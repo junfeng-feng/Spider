@@ -31,7 +31,7 @@ class SpiderTmallShop(Spider):
                 "http://www.to8to.com/ask/k866853.html",
                   ]
 
-    for id in xrange(0, 100):
+    for id in xrange(0, 3000000):
         start_urls.append("http://www.to8to.com/ask/k%s.html" % id)
         
     def __init__(self):
