@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for meilele project
+# Scrapy settings for tobosu project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -9,14 +9,14 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'meilele'
+BOT_NAME = 'tobosu'
 
-SPIDER_MODULES = ['meilele.spiders']
-NEWSPIDER_MODULE = 'meilele.spiders'
+SPIDER_MODULES = ['tobosu.spiders']
+NEWSPIDER_MODULE = 'tobosu.spiders'
 
 ITEM_PIPELINES = {
     'scrapy.pipelines.images.ImagesPipeline': 1,
-    'meilele.pipelines.MeilelePipeline': 300,
+    'tobosu.pipelines.TobosuPipeline': 300,
 }
 
 # mysql config
