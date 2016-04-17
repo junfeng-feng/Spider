@@ -1,41 +1,45 @@
 --
--- 表的结构 `ask_tobato_question`
+-- 表的结构 `ask_meilele_question`
 --
 
-CREATE TABLE IF NOT EXISTS `ask_tobato_question` (
+CREATE TABLE IF NOT EXISTS `ask_meilele_question` (
   `question_id` varchar(64) NOT NULL,
-  `question_title` varchar(256) NOT NULL,
-  `question_category` varchar(64) NOT NULL,
-  `question_description` text NOT NULL,
-  `question_img` varchar(64) NOT NULL COMMENT '图片',
-  PRIMARY KEY (`question_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='土巴兔问答';
+  `question_title` varchar(256) DEFAULT NULL,
+  `question_category` varchar(64) DEFAULT NULL,
+  `question_description` text,
+  `question_img` varchar(64) DEFAULT NULL COMMENT '图片',
+  PRIMARY KEY (`question_id`),
+  KEY `question_id_index` (`question_id`),
+  KEY `question_id` (`question_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='问答';
+
 
 --
--- 转存表中的数据 `ask_tobato_question`
+-- 转存表中的数据 `ask_meilele_question`
 --
 
-INSERT INTO `ask_tobato_question` (`question_id`, `question_title`, `question_category`, `question_description`, `question_img`) VALUES
+INSERT INTO `ask_meilele_question` (`question_id`, `question_title`, `question_category`, `question_description`, `question_img`) VALUES
 ('1', '1', '1', '1', '1');
 
 
 
 --
--- 表的结构 `ask_tobato_answer`
+-- 表的结构 `ask_meilele_answer`
 --
 
-CREATE TABLE IF NOT EXISTS `ask_tobato_answer` (
+CREATE TABLE IF NOT EXISTS `ask_meilele_answer` (
   `answer_id` varchar(64) NOT NULL,
-  `question_id` varchar(64) NOT NULL,
-  `answer_content` text NOT NULL,
-  `answer_img` varchar(64) NOT NULL,
-  `is_best` varchar(8) NOT NULL,
-  PRIMARY KEY (`answer_id`)
+  `question_id` varchar(64) DEFAULT NULL,
+  `answer_content` text,
+  `answer_img` varchar(64) DEFAULT NULL,
+  `is_best` varchar(8) DEFAULT NULL,
+  PRIMARY KEY (`answer_id`),
+  KEY `answer_id_index` (`answer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- 转存表中的数据 `ask_tobato_answer`
+-- 转存表中的数据 `ask_meilele_answer`
 --
 
-INSERT INTO `ask_tobato_answer` (`answer_id`, `question_id`, `answer_content`, `answer_img`, `is_best`) VALUES
+INSERT INTO `ask_meilele_answer` (`answer_id`, `question_id`, `answer_content`, `answer_img`, `is_best`) VALUES
 ('1', '1', '1', '1', '1');

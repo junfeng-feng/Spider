@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS `ask_jiuzheng_question` (
   `question_category` varchar(64)  ,
   `question_description` text  ,
   `question_img` varchar(64)   COMMENT '图片',
-  PRIMARY KEY (`question_id`)
+  PRIMARY KEY (`question_id`),
+  KEY `question_id` (`question_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='jia问答';
 
 --
@@ -30,7 +31,8 @@ CREATE TABLE IF NOT EXISTS `ask_jiuzheng_answer` (
   `answer_content` text  NULL,
   `answer_img` varchar(64) NULL,
   `is_best` varchar(8)  NULL,
-  PRIMARY KEY (`answer_id`)
+  PRIMARY KEY (`answer_id`),
+  KEY `answer_id_index` (`answer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

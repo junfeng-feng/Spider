@@ -26,11 +26,11 @@ class SpiderTmallShop(Spider):
     
     allowed_domain = ['jiuzheng.com']
     start_urls = [
-                  "http://www.jiuzheng.com/ask-detail/id-48534.html",
-                  "http://www.jiuzheng.com/ask-detail/id-37319.html",
+#                   "http://www.jiuzheng.com/ask-detail/id-48534.html",
+#                   "http://www.jiuzheng.com/ask-detail/id-37319.html",
                   ]
 
-    for id in xrange(131, 1000):  # todo
+    for id in xrange(0, 1000000):  # todo
         start_urls.append("http://www.jiuzheng.com/ask-detail/id-%s.html" % id)
         
     def __init__(self):

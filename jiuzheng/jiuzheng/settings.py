@@ -27,9 +27,15 @@ MYSQL_PASSWD = 'root'
 MYSQL_PORT = 3306
 
 #delay
-DOWNLOAD_DELAY = 0.1
+DOWNLOAD_DELAY = 0.5
 COOKIES_ENABLED=False
 
 #images
 # IMAGES_STORE = r'D:\ProgramingIDE\workspace\SuperSpider\jiuzheng\img'
 # IMAGES_EXPIRES = 90
+
+
+DOWNLOADER_MIDDLEWARES = {  
+        'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware' : None,  
+        'jiuzheng.spiders.rotate_useragent.RotateUserAgentMiddleware' :400  
+    } 

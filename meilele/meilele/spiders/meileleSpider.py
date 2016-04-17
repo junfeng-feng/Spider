@@ -22,140 +22,88 @@ logging.basicConfig(level=logging.INFO,
                 filemode='a')
 
 class SpiderTmallShop(Spider):
-    name = 'tobato'
+    name = 'meilele'
     
-    allowed_domain = ['to8to.com']
+    allowed_domain = ['meilele.com']
     start_urls = [
+#                 "http://zx.meilele.com/ask/15097.html",
+#                 "http://zx.meilele.com/ask/35547.html",
+#                 "http://zx.meilele.com/ask/922.html",
                   ]
 
-#     for id in xrange(0, 1000000):
-#         start_urls.append("http://www.to8to.com/ask/k%s.html" % id)
+    for id in xrange(0, 1000):
+        start_urls.append("http://zx.meilele.com/ask/%s.html" % id)
         
     def __init__(self):
-        self.questionIdPatten = re.compile("k[0-9]+")
-        self.pageUrl = "http://www.to8to.com/ask/k%s-%s.html"
+        self.digitalPattern = re.compile("[0-9]+")
+        self.pageUrl = "http://zx.meilele.com/ask/?act=getMoreAnswer&page=%s&id=%s"
         pass
     
     def parse(self, response):
         select = Selector(response)
-        if "data" in response.meta:
-            isNextPage = response.meta["data"]
+        if "question_id" in response.meta:
+            isNextPage = response.meta["question_id"]
         else:
             isNextPage = "firstPage"
         
-        
-        question_id = self.questionIdPatten.findall(response.url)[0]
-        question_id = question_id[1:].replace("-", "")
-        
-        item = TobatoItem()
-        item["question_id"] = question_id
-        
-        # pages 取第二页
-        try:
-            logging.info("# pages 取第二页")
-            totoal_answers = select.css(".pages").xpath(".//em/b/text()").extract()[0]
-            pages = int(totoal_answers) / 20 + 1  # page从2开始计算
+        if isNextPage == "firstPage":
+            # 第一页只处理问题
+            question_id = self.digitalPattern.findall(response.url)[0]
             
-            for page in xrange(2, pages + 1):  # xrange[)
-                requestUrl = self.pageUrl % (question_id, page)
-                logging.info(requestUrl + "---------------------------------------")
-                request = Request(url=requestUrl, callback=self.parse, priority=123456)
-                request.meta["data"] = "true"
-                yield request
-                pass
-        except Exception, e:
-            print e
-        
-        item["question_title"] = select.css(".ask_qustion").xpath(".//h1/text()").extract()[0]
-        try:
-            item["question_description"] = select.css(".ask_qustion").xpath("./p").extract()[0][21:-4]
-        except Exception, e:
-            item["question_description"] = ""
-            print e
-        
-        item["imageStatus"] = {}
-        item["image_urls"] = []
-        try:
-            question_image_url = select.css(".ask_qustion").xpath(".//img/@src").extract()[0]
-            item["image_urls"].append(question_image_url)
+            item = MeileleItem()
+            item["question_id"] = question_id
             
-            item["imageStatus"] = {question_id:question_image_url}
-        except Exception, e:
-            print e
-        
-        
-        try:
-            big_category = select.css(".has_arrow")[2].xpath(".//a/text()").extract()[0]
-        except Exception, e:
-            big_category = ""
-            print e
-        try:
-            small_category = select.css(".has_arrow")[3].xpath(".//a/text()").extract()[0]
-        except Exception, e:
-            small_category = ""
-            print e
-       
-        item["question_category"] = big_category + "," + small_category
-        item["is_question"] = "yes"
-        yield item
-        item = copy.deepcopy(item)
-        
-        item["question_title"] =""
-        item["question_category"] = ""
-        item["question_description"] = ""
-        item["image_urls"] = []
-        
-        
-        best_answer_flag = False
-        try:        
-            # 有的问题没有答案，所以使用try
-            
-            # best
-            item["answer_id"] = str(uuid.uuid1())
-            item["answer_content"] = select.css(".best_answer").xpath("./p").extract()[0][21:-4]
-            item["is_best"] = "yes"
-            # 如果最佳答案有图片
+            # pages 翻页
             try:
-                image_url = "http://www.to8to.com" + select.css(".best_answer").xpath("./img/@src")[0].extract()
-                item["image_urls"].append(image_url)
-                
-                item["imageStatus"][item["answer_id"]] = image_url
+                logging.info("# pages 取页码")
+                totoal_answers = select.css(".ans_left").xpath(".//text()")[1].extract()
+                totoal_answers = self.digitalPattern.findall(totoal_answers)[0]
+                pages = int(totoal_answers) / 5 + 1  # page从1开始计算
+                 
+                for page in xrange(1, pages + 1):  # xrange[)
+                    requestUrl = self.pageUrl % (page, question_id)
+                    
+#                     logging.info("--------------------requestUrl：" + requestUrl)
+                    request = Request(url=requestUrl, callback=self.parse, priority=123456)
+                    request.meta["question_id"] = question_id
+                    yield request
+                    pass
             except Exception, e:
                 print e
-            best_answer_flag = True
-            if not isNextPage == "true":#如果是翻页请求，则不保存最佳答案
-                #是第一页，则保存最佳答案
-                item["is_question"] = "no"
-                item["image_urls"] = []
-                yield item
-                item = copy.deepcopy(item)
             
+            item["question_title"] = "".join(select.css(".ask_de_con").xpath(".//div")[1].xpath(".//text()").extract()).strip()
+            try:
+                item["question_description"] = select.css(".descre").xpath(".//p")[2].extract()[4:-4]
+            except Exception, e:
+                item["question_description"] = ""
+                print e
+            
+            
+            try:
+                big_category = ">".join(select.css(".w_position").xpath(".//a/text()").extract()[2:])
+            except Exception, e:
+                big_category = ""
+                print e
+           
+            item["question_category"] = big_category
+            item["is_question"] = "yes"
+            yield item
+            
+        else:
+            # 抓取答案
             # other answer
-            ask_answer_li_list = select.css(".ask_answer_li")
-            if best_answer_flag:
-                ask_answer_li_list = ask_answer_li_list[1:]  # 有最佳答案，就去掉最佳答案
-                
+            ask_answer_li_list = json.loads(response.body, encoding="utf-8")["result"]
+            
             for li in ask_answer_li_list:
-                item = copy.deepcopy(item)  # 还是需要复制一份，否则数据id是重复的
-                item["answer_id"] = str(uuid.uuid1())
+                item = MeileleItem()
+                item["question_id"] = response.meta["question_id"]
+                item["answer_id"] = str(uuid.uuid1()) + "-" + li["ask_id"]
                 
-                item["answer_content"] = li.xpath(".//p").extract()[0][21:-4]
+                item["answer_content"] = li["ask_content"]
                 item["is_best"] = "no"
                 
-                try:
-                    image_url = "http://www.to8to.com" + li.xpath("./img/@src")[0].extract()
-                    item["image_urls"].append(image_url)
-                    
-                    item["imageStatus"][item["answer_id"]] = image_url
-                except Exception, e:
-                    print e
-                
                 item["is_question"] = "no"
-                item["image_urls"] = []
                 yield item
-                item = copy.deepcopy(item)
-                
                 pass
-        except Exception, e:
-            print e
+            pass
         pass

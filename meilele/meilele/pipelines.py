@@ -4,13 +4,13 @@ import MySQLdb.cursors
 from twisted.enterprise import adbapi
 import logging
 
-class MeilelePipeline(object):\
+class MeilelePipeline(object):
     def __init__(self, dbargs):
         self.dbargs = dbargs
-        self.insertQuestionSql = r"""INSERT INTO `ask_tobato_question`
+        self.insertQuestionSql = r"""INSERT INTO `ask_meilele_question`
 (`question_id`, `question_title`, `question_category`, `question_description`, `question_img`) VALUES
 (%s, %s, %s, %s, %s);"""
-        self.insertAnswerSql = r"""INSERT INTO `ask_tobato_answer` 
+        self.insertAnswerSql = r"""INSERT INTO `ask_meilele_answer` 
         (`answer_id`, `question_id`, `answer_content`, `answer_img`, `is_best`) VALUES
 (%s, %s, %s, %s, %s);"""
     
@@ -43,12 +43,6 @@ class MeilelePipeline(object):\
 
         if item["is_question"] == "yes":
             image_src = ""
-            if item["question_id"] in item["imageStatus"] and not item["question_description"].startswith("<img"):
-                for image in item["images"]:
-                    if image["url"] == item["imageStatus"][item["question_id"]]:
-                        image_src = "/ask/t" + image["path"][4:]
-                        break
-
             try:
                 tx.execute(self.insertQuestionSql,
                        (item["question_id"],
@@ -62,12 +56,6 @@ class MeilelePipeline(object):\
             pass
         else:
             image_src = ""
-            if item["answer_id"] in item["imageStatus"]:
-                for image in item["images"]:
-                    if image["url"] == item["imageStatus"][item["answer_id"]]:
-                        image_src = "/ask/t" + image["path"][4:]
-                        break
-            
             try:
                 tx.execute(self.insertAnswerSql,
                        (
