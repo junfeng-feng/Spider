@@ -10,6 +10,7 @@ import copy
 import uuid
 import sys
 from scrapy.item import Item
+from __builtin__ import int
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -29,24 +30,43 @@ class SpiderTmallShop(Spider):
 #                   "http://www.dianping.com/search/category/1/90/g90p50"
                   ]
 
+#     for line in file("dianping/spiders/cityCode.list"):
+#         line  = line.strip().split("\n")
+#         cityCode = line[0]
+        
     for id in xrange(0, 2900):
         start_urls.append("http://www.dianping.com/search/category/%s/90/g90p50" % id)
         
     def __init__(self):
         self.questionIdPatten = re.compile("[0-9]+")
-        self.pageUrl = ""
+        self.pageUrl = "http://www.dianping.com/search/category/%s/90/g90p%s"
         self.fw=file("cityCode.list", "w")
         pass
     
     def parse(self, response):
         select = Selector(response)
-        cityId = self.questionIdPatten.findall(response.url)[0]
-        cityName = select.css(".city").xpath("./text()").extract()[0]
+        item = DianpingItem()
+        allNo = self.questionIdPatten.findall(response.url)
+        cityId = allNo[0] #cityid
+        pageNumber = allNo[-1]
         
-        self.fw.write("%s\t%s\n"%(cityId, cityName))
-        self.fw.flush()
+        item["city_id"] = cityId
         
-        if response.status == 403:
-            sys.exit(0)
-            return
+        yieldItemFlag = False
+        
+#         cityName = select.css(".city").xpath("./text()").extract()[0]
+#         
+#         self.fw.write("%s\t%s\n"%(cityId, cityName))
+#         self.fw.flush()
+#         
+#         if response.status == 403:
+#             sys.exit(0)
+#             return
+
+        if yieldItemFlag:
+            #如果当前页有数据，则继续请求下一页
+            nextPageNumber = int(pageNumber) + 50
+            url = self.pageUrl %(cityId, nextPageNumber)
+            request = Request(url, callback=self.parse, priority=123456)
+            yield request
         pass

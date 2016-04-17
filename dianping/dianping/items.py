@@ -27,7 +27,7 @@ class DianpingItem(scrapy.Item):
     shop_subway_line= scrapy.Field()
     shop_bus_line= scrapy.Field()
     shop_description = scrapy.Field()
-    
+    city_id = scrapy.Field(
     
     #rate
     rate_id= scrapy.Field()
