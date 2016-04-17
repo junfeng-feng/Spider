@@ -30,8 +30,8 @@ class SpiderTmallShop(Spider):
 #                   "http://www.tobosu.com/ask/question/1427.html",  # 翻页
                   ]
 
-    for id in xrange(0, 300):  # samples
-        start_urls.append("http://www.to8to.com/ask/k%s.html" % id)
+    for id in xrange(1000, 500000):  # samples
+        start_urls.append("http://www.tobosu.com/ask/question/%s.html" % id)
         
     def __init__(self):
         self.digitalPattern = re.compile("[0-9]+")
@@ -39,6 +39,11 @@ class SpiderTmallShop(Spider):
         pass
     
     def parse(self, response):
+        if response.status == 404:
+            # 如果返回404，可以直接返回，不需要处理
+            logging.info("response.status:" + response.status)
+            return
+        
         select = Selector(response)
         if "data" in response.meta:
             isNextPage = response.meta["data"]

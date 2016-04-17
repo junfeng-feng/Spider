@@ -53,5 +53,6 @@ encoding//tobato/tobato/pipelines.py=utf-8
 encoding//tobato/tobato/settings.py=utf-8
 encoding//tobato/tobato/spiders/tobatoSpider.py=utf-8
 encoding//tobosu/tobosu/pipelines.py=utf-8
+encoding//tobosu/tobosu/settings.py=utf-8
 encoding//tobosu/tobosu/spiders/tobosuSpdier.py=utf-8
 encoding/<project>=UTF-8

@@ -31,7 +31,7 @@ class SpiderTmallShop(Spider):
 #                 "http://zx.meilele.com/ask/922.html",
                   ]
 
-    for id in xrange(0, 1000):
+    for id in xrange(1000, 500000):
         start_urls.append("http://zx.meilele.com/ask/%s.html" % id)
         
     def __init__(self):
@@ -40,6 +40,11 @@ class SpiderTmallShop(Spider):
         pass
     
     def parse(self, response):
+        if response.status == 404:
+            # 如果返回404，可以直接返回，不需要处理
+            logging.info("response.status:" + response.status)
+            return
+                
         select = Selector(response)
         if "question_id" in response.meta:
             isNextPage = response.meta["question_id"]
