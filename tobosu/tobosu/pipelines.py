@@ -43,11 +43,6 @@ class TobosuPipeline(object):
 
         if item["is_question"] == "yes":
             image_src = ""
-            if item["question_id"] in item["imageStatus"] and not item["question_description"].startswith("<img"):
-                for image in item["images"]:
-                    if image["url"] == item["imageStatus"][item["question_id"]]:
-                        image_src = "/ask/t" + image["path"][4:]
-                        break
 
             try:
                 tx.execute(self.insertQuestionSql,
@@ -62,11 +57,6 @@ class TobosuPipeline(object):
             pass
         else:
             image_src = ""
-            if item["answer_id"] in item["imageStatus"]:
-                for image in item["images"]:
-                    if image["url"] == item["imageStatus"][item["answer_id"]]:
-                        image_src = "/ask/t" + image["path"][4:]
-                        break
             
             try:
                 tx.execute(self.insertAnswerSql,

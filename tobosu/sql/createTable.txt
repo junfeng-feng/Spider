@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS `ask_tobosu_question` (
   `question_id` varchar(64) NOT NULL,
   `question_title` varchar(256) DEFAULT NULL,
-  `question_category` varchar(64) DEFAULT NULL,
+  `question_category` varchar(64) DEFAULT NULL COMMENT '标签，无分类',
   `question_description` text,
   `question_img` varchar(64) DEFAULT NULL COMMENT '图片',
   PRIMARY KEY (`question_id`),
@@ -13,20 +13,9 @@ CREATE TABLE IF NOT EXISTS `ask_tobosu_question` (
   KEY `question_id` (`question_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='问答';
 
-
---
--- 转存表中的数据 `ask_tobosu_question`
---
-
-INSERT INTO `ask_tobosu_question` (`question_id`, `question_title`, `question_category`, `question_description`, `question_img`) VALUES
-('1', '1', '1', '1', '1');
-
-
-
 --
 -- 表的结构 `ask_tobosu_answer`
 --
-
 CREATE TABLE IF NOT EXISTS `ask_tobosu_answer` (
   `answer_id` varchar(64) NOT NULL,
   `question_id` varchar(64) DEFAULT NULL,
@@ -37,9 +26,9 @@ CREATE TABLE IF NOT EXISTS `ask_tobosu_answer` (
   KEY `answer_id_index` (`answer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- 转存表中的数据 `ask_tobosu_answer`
---
+
+INSERT INTO `ask_tobosu_question` (`question_id`, `question_title`, `question_category`, `question_description`, `question_img`) VALUES
+('1', '1', '1', '1', '1');
 
 INSERT INTO `ask_tobosu_answer` (`answer_id`, `question_id`, `answer_content`, `answer_img`, `is_best`) VALUES
 ('1', '1', '1', '1', '1');
