@@ -1,0 +1,52 @@
+--
+-- 表的结构 `dianping_shop`
+--
+
+CREATE TABLE IF NOT EXISTS `dianping_shop` (
+  `shop_id` varchar(64) NOT NULL COMMENT '门店ID',
+  `shop_name` varchar(64) ,
+  `shop_img` varchar(64) ,
+  `shop_area` varchar(64)  COMMENT '店铺地区',
+  `shop_domain` varchar(64)  COMMENT '店铺区域',
+  `shop_address` varchar(64)  COMMENT '门店所在地',
+  `shop_telphone` varchar(16) ,
+  `shop_open_time` varchar(64) ,
+  `shop_tag` varchar(64) ,
+  `shop_map_attitude` varchar(64)  COMMENT '地图坐标',
+  `shop_contact_man` varchar(64) ,
+  `shop_subway_line` varchar(64) ,
+  `shop_bus_line` varchar(64) ,
+  `shop_description` varchar(64) ,
+  PRIMARY KEY (`shop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
+-- 表的结构 `dianping_rate`
+--
+
+CREATE TABLE IF NOT EXISTS `dianping_rate` (
+  `rate_id` varchar(64) NOT NULL ,
+  `user_photo` varchar(64) ,
+  `user_nickname` varchar(64) ,
+  `rate_content` text ,
+  `rate_img` varchar(256)  COMMENT '图片：多图',
+  `rate_datetime` varchar(64) ,
+  `shop_id` varchar(64),
+  PRIMARY KEY (`rate_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
+-- 转存表中的数据 `dianping_shop`
+--
+
+INSERT INTO `dianping_shop` (`shop_id`, `shop_name`, `shop_img`, `shop_area`, `shop_domain`, `shop_address`, `shop_telphone`, `shop_open_time`, `shop_tag`, `shop_map_attitude`, `shop_contact_man`, `shop_subway_line`, `shop_bus_line`, `shop_description`) VALUES
+('1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1');
+
+--
+-- 转存表中的数据 `dianping_rate`
+--
+
+INSERT INTO `dianping_rate` (`rate_id`, `user_photo`, `user_nickname`, `rate_content`, `rate_img`, `rate_datetime`, `shop_id`) VALUES
+('1', '1', '1', '1', '1', '1', '1');

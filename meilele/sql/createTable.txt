@@ -9,8 +9,7 @@ CREATE TABLE IF NOT EXISTS `ask_meilele_question` (
   `question_description` text,
   `question_img` varchar(64) DEFAULT NULL COMMENT '图片',
   PRIMARY KEY (`question_id`),
-  KEY `question_id_index` (`question_id`),
-  KEY `question_id` (`question_id`)
+  KEY `question_id_index` (`question_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='问答';
 
 
