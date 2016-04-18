@@ -27,7 +27,7 @@ MYSQL_PASSWD = 'root'
 MYSQL_PORT = 3306
 
 #delay
-DOWNLOAD_DELAY = 0.2
+DOWNLOAD_DELAY = 0.1
 
 #images
 IMAGES_STORE = r'./img'

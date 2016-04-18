@@ -27,7 +27,7 @@ MYSQL_PASSWD = 'root'
 MYSQL_PORT = 3306
 
 #delay
-DOWNLOAD_DELAY = 0.5
+DOWNLOAD_DELAY = 0.5 #是jiuzheng网站的门槛
 COOKIES_ENABLED=False
 
 #images

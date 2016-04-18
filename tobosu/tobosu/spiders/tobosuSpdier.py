@@ -30,7 +30,7 @@ class SpiderTmallShop(Spider):
 #                   "http://www.tobosu.com/ask/question/1427.html",  # 翻页
                   ]
 
-    for id in xrange(1000, 500000):  # samples
+    for id in xrange(103750, 500000):  # samples
         start_urls.append("http://www.tobosu.com/ask/question/%s.html" % id)
         
     def __init__(self):

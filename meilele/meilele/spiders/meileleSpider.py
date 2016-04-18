@@ -28,10 +28,10 @@ class SpiderTmallShop(Spider):
     start_urls = [
 #                 "http://zx.meilele.com/ask/15097.html",
 #                 "http://zx.meilele.com/ask/35547.html",
-#                 "http://zx.meilele.com/ask/922.html",
+#                 "http://zx.meilele.com/ask/290.html",
                   ]
 
-    for id in xrange(1000, 500000):
+    for id in xrange(35610, 100000):
         start_urls.append("http://zx.meilele.com/ask/%s.html" % id)
         
     def __init__(self):
@@ -105,7 +105,10 @@ class SpiderTmallShop(Spider):
                 item["answer_id"] = str(uuid.uuid1()) + "-" + li["ask_id"]
                 
                 item["answer_content"] = li["ask_content"]
-                item["is_best"] = "no"
+                if li["ask_best"] == "1":
+                    item["is_best"] = "yes"
+                else:
+                    item["is_best"] = "no"
                 
                 item["is_question"] = "no"
                 yield item
