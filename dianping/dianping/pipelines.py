@@ -7,9 +7,12 @@ import logging
 class DianpingPipeline(object):
     def __init__(self, dbargs):
         self.dbargs = dbargs
-        self.insertQuestionSql = r"""INSERT INTO `ask_tobato_question`
-(`question_id`, `question_title`, `question_category`, `question_description`, `question_img`) VALUES
-(%s, %s, %s, %s, %s);"""
+        self.insertQuestionSql = r"""INSERT INTO `dianping_shop` 
+        (`shop_id`, `shop_name`, `shop_img`, `shop_area`, `shop_domain`, `shop_category`, `shop_cityname`, `shop_address`, 
+        `shop_telphone`, `shop_open_time`, `shop_tag`, `shop_map_attitude`, `shop_contact_man`, 
+         `shop_bus_line`, `shop_description`, `city_id`) VALUES
+(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+"""
         self.insertAnswerSql = r"""INSERT INTO `ask_tobato_answer` 
         (`answer_id`, `question_id`, `answer_content`, `answer_img`, `is_best`) VALUES
 (%s, %s, %s, %s, %s);"""
@@ -41,21 +44,27 @@ class DianpingPipeline(object):
     
     def insertTmallShopSql(self, tx, item):
 
-        if item["is_question"] == "yes":
-            image_src = ""
-            if item["question_id"] in item["imageStatus"] and not item["question_description"].startswith("<img"):
-                for image in item["images"]:
-                    if image["url"] == item["imageStatus"][item["question_id"]]:
-                        image_src = "/ask/t" + image["path"][4:]
-                        break
-
+        item["shop_img"] = ",".join( [path["path"] for path in item["images"]])
+        if item["shop_flag"] == "yes":
             try:
                 tx.execute(self.insertQuestionSql,
-                       (item["question_id"],
-                        item["question_title"],
-                        item["question_category"],
-                        item["question_description"],
-                        image_src
+                       (item["shop_id"],
+                        item["shop_name"],
+                        item["shop_img"],
+                        item["shop_area"],
+                        item["shop_domain"],
+                        item["shop_category"],
+                        item["shop_cityname"],
+                        item["shop_address"],
+                        item["shop_telphone"],
+                        item["shop_open_time"],
+                        item["shop_tag"],
+                        item["shop_map_attitude"],
+                        item["shop_contact_man"],
+                        item["shop_subway_line"],
+                        item["shop_bus_line"],
+                        item["shop_description"],
+                        item["city_id"],
                         ))
             except Exception, e:
                 print e

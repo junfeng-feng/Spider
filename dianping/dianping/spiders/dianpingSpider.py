@@ -27,7 +27,7 @@ class SpiderTmallShop(Spider):
     
     allowed_domain = ['dinaping.com']
     start_urls = [
-                   "http://www.dianping.com/search/category/1/90/g90p3720"
+                   "http://www.dianping.com/search/category/1/90/g90p3710"
                   ]
 
 #     for line in file("dianping/spiders/cityCode.list"):
@@ -40,6 +40,7 @@ class SpiderTmallShop(Spider):
     def __init__(self):
         self.questionIdPatten = re.compile("[0-9]+")
         self.pageUrl = "http://www.dianping.com/search/category/%s/90/g90p%s"
+        
         self.fw = file("pages.list", "w")
         pass
     
@@ -71,7 +72,7 @@ class SpiderTmallShop(Spider):
                 yieldPageFlag = True
                 
                 item["shop_name"] = li.xpath(".//p[@class='title']/a/text()").extract()[0]
-                item["shop_area"] = cityName  # 地区
+                item["shop_cityname"] = cityName  # 地区
                 # domain，当做标签，非区域，抓取区域指地区
                 item["shop_domain"] = ",".join(li.xpath(".//p[@class='area-key']/span[@class='area-list']/a/text()").extract())
                 key_list = ",".join(li.xpath(".//p[@class='area-key']/span[@class='key-list']/a/text()").extract())
@@ -82,12 +83,14 @@ class SpiderTmallShop(Spider):
                 href = li.xpath(".//p[@class='title']/a[@class='shopname']/@href").extract()[0]
                 item["shop_id"] = href.split("/")[-1]
                 
-                
+                print item
                 shopUrl = "http://www.dianping.com" + href
-                
-                request = Request(shopUrl, callback=self.parse, priority=12345678)
+                request = Request(shopUrl, callback=self.parse, priority=12345)
                 request.meta["shopDetail"] = copy.deepcopy(item)
                 yield request
+                
+                yieldPageFlag = False
+                break #for test
                 pass
             
             if yieldPageFlag:
@@ -95,19 +98,33 @@ class SpiderTmallShop(Spider):
                 #翻页DONE
                 nextPageNumber = int(pageNumber) + 1
                 url = self.pageUrl % (cityId, nextPageNumber)
-                request = Request(url, callback=self.parse, priority=123456)
+                request = Request(url, callback=self.parse, priority=1234)
                 yield request
                 
             pass
         else:
             # 店铺页面
             item = response.meta["shopDetail"]
-            # 店铺详情页div: main page-sa page-shop Fix
-            main = select.xpath(".//div[@class='main page-sa page-shop Fix']")
-            mainBody = select.xpath(".//div[@id='main-body']")
-            body = select.xpath(".//div[@id='body']")
             
+            # 店铺详情页div: main page-sa page-shop Fix
+            try:
+                main = select.xpath(".//div[@class='main page-sa page-shop Fix']")
+            except Exception, e:
+                print e
+            try:
+                mainBody = select.xpath(".//div[@id='main-body']")
+            except Exception, e:
+                print e
+            try:
+                body = select.xpath(".//div[@id='body']")
+            except Exception, e:
+                print e
+            
+            print main
+            print mainBody
+            print body
             if len(main) > 0:
+                print "before"
                 self.parseMain(select, response, item)
             elif len(mainBody) > 0:
                 self.parseMainBody(select, response, item)
@@ -120,30 +137,63 @@ class SpiderTmallShop(Spider):
             pass
 
     def parseMain(self, select, response, item):
-        self.fw.write(response.url + "\tparseMain\n")
-        self.fw.flush()
-        # shop info
-#         item["shop_domain"] = select.xpath(".//span[@class='region']/text()").extract()[0]
-#         address = select.xpath(".//span[@itemprop='street-address']/text()").extract()[0]
-#         
-#         item["shop_address"] = item["shop_domain"] + address
-#         try:
-#             item['shop_telphone'] = select.xpath(".//strong [@itemprop='tel']/text()").extract()[0]
-#         except Exception, e:
-#             print e
-#             
-#         # shop bus and other info
-#         otherInfo = select.xpath(".//div[@class='block-inner desc-list']/dl")
-#         item["shop_open_time"] = ""
-#         item["shop_bus_line"] = ""
-#         for li in otherInfo:
-#             html = li.extract()
-#             if html.find("营业") != -1:
-#                 item["shop_open_time"] = li.xpath(".//dd/span/text()").extract()[0]
-#             elif html.find("公交") != -1:
-#                 item["shop_bus_line"] = li.xpath(".//dd/span/text()").extract()[0]
-#             pass
+        print "parseMain"         
+        breadcrumb = select.xpath(".//div[@class='breadcrumb']/b/a/span/text()")
+        item["shop_domain"] = breadcrumb[0]
+        item["shop_area"] = breadcrumb[1:3]
+        item["shop_category"] = breadcrumb[3:]
         
+#         self.fw.write(response.url + "\tparseMain\n")
+#         self.fw.flush()
+        # shop info
+        try:
+            addressPrefix = select.xpath(".//span[@class='region']/text()").extract()[0]
+            address = select.xpath(".//span[@itemprop='street-address']/text()").extract()[0]
+            item["shop_address"] = addressPrefix + address
+        except Exception, e:
+            item["shop_address"] =""
+            print e
+
+        try:
+            item['shop_telphone'] = select.xpath(".//strong [@itemprop='tel']/text()").extract()[0]
+        except Exception, e:
+            item['shop_telphone']  = ""
+            print e
+             
+        # shop bus and other info
+        otherInfo = select.xpath(".//div[@class='block-inner desc-list']/dl")
+        item["shop_open_time"] = ""
+        item["shop_bus_line"] = ""
+        for li in otherInfo:
+            html = li.extract()
+            if html.find("营业") != -1:
+                item["shop_open_time"] = li.xpath(".//dd/span/text()").extract()[0]
+            elif html.find("公交") != -1:
+                item["shop_bus_line"] = li.xpath(".//dd/span/text()").extract()[0]
+            pass
+        
+        item["shop_map_attitude"] = ""
+        item["shop_contact_man"] = ""
+        
+        photoUrl = response.url + "/photos"
+        request = Request(photoUrl, self.parseMainPhotos, priority=123456)
+        request.meta["item"] = copy.deepcopy(item)
+        
+        yield request
+    def parseMainPhotos(self, response):
+        #解析 http://www.dianping.com/shop/18097023/photos
+        select = Selector(response)
+        
+        item = response.meta["item"]
+        item["image_urls"] = []
+        
+        pic_list = select.xpath(".//a[@class='p-img']/@href").extract()
+        for pic in pic_list:
+            item["image_urls"].append("http://www.dianping.com"+pic)
+        item["shop_flag"] = "yes"
+        yield item
+        
+        pass
     def parseMainBody(self, select, response, item):
         self.fw.write(response.url + "\tparseMainBody\n")
         self.fw.flush()
