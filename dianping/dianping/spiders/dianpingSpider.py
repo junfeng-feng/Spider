@@ -11,6 +11,7 @@ import uuid
 import sys
 from scrapy.item import Item
 from __builtin__ import int
+from ctypes.test.test_random_things import callback_func
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -90,12 +91,12 @@ class SpiderTmallShop(Spider):
                 yield request
                 
                 yieldPageFlag = False
-                break #for test
+                break  # for test
                 pass
             
             if yieldPageFlag:
                 # 如果当前页有数据，则继续请求下一页
-                #翻页DONE
+                # 翻页DONE
                 nextPageNumber = int(pageNumber) + 1
                 url = self.pageUrl % (cityId, nextPageNumber)
                 request = Request(url, callback=self.parse, priority=1234)
@@ -124,7 +125,6 @@ class SpiderTmallShop(Spider):
             print mainBody
             print body
             if len(main) > 0:
-                print "before"
                 self.parseMain(select, response, item)
             elif len(mainBody) > 0:
                 self.parseMainBody(select, response, item)
@@ -137,11 +137,18 @@ class SpiderTmallShop(Spider):
             pass
 
     def parseMain(self, select, response, item):
-        print "parseMain"         
-        breadcrumb = select.xpath(".//div[@class='breadcrumb']/b/a/span/text()")
-        item["shop_domain"] = breadcrumb[0]
-        item["shop_area"] = breadcrumb[1:3]
-        item["shop_category"] = breadcrumb[3:]
+        print "parseMain"       
+        try:  
+            breadcrumb = select.xpath(".//div[@class='breadcrumb']/b/a/span/text()").extract()
+            item["shop_domain"] = breadcrumb[0]
+            item["shop_area"] = ",".join(breadcrumb[1:3])
+            item["shop_category"] = ",".join(breadcrumb[3:])
+        except Exception, e:
+            item["shop_domain"] = ""
+            item["shop_area"] = ""
+            item["shop_category"] = ""
+            print e
+
         
 #         self.fw.write(response.url + "\tparseMain\n")
 #         self.fw.flush()
@@ -151,48 +158,60 @@ class SpiderTmallShop(Spider):
             address = select.xpath(".//span[@itemprop='street-address']/text()").extract()[0]
             item["shop_address"] = addressPrefix + address
         except Exception, e:
-            item["shop_address"] =""
+            item["shop_address"] = ""
             print e
-
+            
         try:
             item['shop_telphone'] = select.xpath(".//strong [@itemprop='tel']/text()").extract()[0]
         except Exception, e:
-            item['shop_telphone']  = ""
+            item['shop_telphone'] = ""
             print e
-             
-        # shop bus and other info
-        otherInfo = select.xpath(".//div[@class='block-inner desc-list']/dl")
+#              
+#         # shop bus and other info
+        
         item["shop_open_time"] = ""
         item["shop_bus_line"] = ""
-        for li in otherInfo:
-            html = li.extract()
-            if html.find("营业") != -1:
-                item["shop_open_time"] = li.xpath(".//dd/span/text()").extract()[0]
-            elif html.find("公交") != -1:
-                item["shop_bus_line"] = li.xpath(".//dd/span/text()").extract()[0]
-            pass
-        
+        try:
+            otherInfo = select.xpath(".//div[@class='block-inner desc-list']/dl")
+            for li in otherInfo:
+                html = li.extract()
+                if html.find("营业") != -1:
+                    item["shop_open_time"] = li.xpath(".//dd/span/text()").extract()[0]
+                elif html.find("公交") != -1:
+                    item["shop_bus_line"] = li.xpath(".//dd/span/text()").extract()[0]
+                pass
+        except Exception, e:
+            print e
+       
         item["shop_map_attitude"] = ""
         item["shop_contact_man"] = ""
-        
         photoUrl = response.url + "/photos"
-        request = Request(photoUrl, self.parseMainPhotos, priority=123456)
+        print photoUrl
+        request = Request(photoUrl, callback=self.parseMainPhotos, priority=123)
         request.meta["item"] = copy.deepcopy(item)
         
-        yield request
+        print item
+#         yield request
+        pass
+    
     def parseMainPhotos(self, response):
-        #解析 http://www.dianping.com/shop/18097023/photos
+        # 解析 http://www.dianping.com/shop/18097023/photos
         select = Selector(response)
         
         item = response.meta["item"]
         item["image_urls"] = []
         
-        pic_list = select.xpath(".//a[@class='p-img']/@href").extract()
-        for pic in pic_list:
-            item["image_urls"].append("http://www.dianping.com"+pic)
-        item["shop_flag"] = "yes"
-        yield item
+        print item
         
+        try:
+            pic_list = select.xpath(".//a[@class='p-img']/@href").extract()
+            for pic in pic_list:
+                item["image_urls"].append("http://www.dianping.com" + pic)
+        except Exception, e:
+            print e
+        item["shop_flag"] = "yes"
+        print item
+        yield item
         pass
     def parseMainBody(self, select, response, item):
         self.fw.write(response.url + "\tparseMainBody\n")
