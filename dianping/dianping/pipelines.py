@@ -43,7 +43,6 @@ class DianpingPipeline(object):
         return item
     
     def insertTmallShopSql(self, tx, item):
-
         item["shop_img"] = ",".join( [path["path"] for path in item["images"]])
         if item["shop_flag"] == "yes":
             try:
@@ -69,24 +68,3 @@ class DianpingPipeline(object):
             except Exception, e:
                 print e
             pass
-        else:
-            image_src = ""
-            if item["answer_id"] in item["imageStatus"]:
-                for image in item["images"]:
-                    if image["url"] == item["imageStatus"][item["answer_id"]]:
-                        image_src = "/ask/t" + image["path"][4:]
-                        break
-            
-            try:
-                tx.execute(self.insertAnswerSql,
-                       (
-                        item["answer_id"],
-                        item["question_id"],
-                        item["answer_content"],
-                        image_src,
-                        item["is_best"],
-                        ))
-            except Exception, e:
-                print e
-            pass
-        

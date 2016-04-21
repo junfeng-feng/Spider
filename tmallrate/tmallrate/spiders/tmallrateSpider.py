@@ -53,7 +53,7 @@ class SpiderTmall(Spider):
             paginator = bodyJson["paginator"]
             lastPage = int(paginator["lastPage"])
             currentPage = int(paginator["page"])
-            if currentPage < lastPage and currentPage < 4:#只取前三页的评论数据
+            if currentPage < lastPage and currentPage < 3:#只取前三页的评论数据
                 itemId = argsMap["itemId"]
                 sellerId = argsMap["sellerId"]                
                 pageNo = currentPage + 1

@@ -125,11 +125,11 @@ class SpiderTmallShop(Spider):
             print mainBody
             print body
             if len(main) > 0:
-                self.parseMain(select, response, item)
+                yield self.parseMain(select, response, item)
             elif len(mainBody) > 0:
-                self.parseMainBody(select, response, item)
+                yield self.parseMainBody(select, response, item)
             elif len(body) > 0 :
-                self.parseBody(select, response, item)
+                yield self.parseBody(select, response, item)
             else:
                 # 未识别的url
                 self.fw.write(response.url + "\tunknown-------------\n")
@@ -138,6 +138,14 @@ class SpiderTmallShop(Spider):
 
     def parseMain(self, select, response, item):
         print "parseMain"       
+        if response.body.find("地图坐标")!=-1:
+            self.fw.write(response.url +" 地图坐标")
+            self.fw.flush()
+        
+        if response.body.find("门店介绍")!=-1:
+            self.fw.write(response.url +" 地图坐标")
+            self.fw.flush()
+        
         try:  
             breadcrumb = select.xpath(".//div[@class='breadcrumb']/b/a/span/text()").extract()
             item["shop_domain"] = breadcrumb[0]
@@ -189,14 +197,17 @@ class SpiderTmallShop(Spider):
         print photoUrl
         request = Request(photoUrl, callback=self.parseMainPhotos, priority=123)
         request.meta["item"] = copy.deepcopy(item)
-        
-        print item
-#         yield request
-        pass
-    
+        return request
+
+    #===========================================================================
+    # parseMainPhotos
+    # return [item, request]
+    #===========================================================================
     def parseMainPhotos(self, response):
         # 解析 http://www.dianping.com/shop/18097023/photos
         select = Selector(response)
+        
+        print "parseMainPhotos"
         
         item = response.meta["item"]
         item["image_urls"] = []
@@ -204,13 +215,13 @@ class SpiderTmallShop(Spider):
         print item
         
         try:
-            pic_list = select.xpath(".//a[@class='p-img']/@href").extract()
+            pic_list = select.xpath(".//a[@class='p-img']/img/@src").extract()
             for pic in pic_list:
-                item["image_urls"].append("http://www.dianping.com" + pic)
+                # wrong toto
+                item["image_urls"].append(pic)
         except Exception, e:
             print e
         item["shop_flag"] = "yes"
-        print item
         yield item
         pass
     def parseMainBody(self, select, response, item):
