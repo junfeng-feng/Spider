@@ -28,7 +28,7 @@ class SpiderTmallShop(Spider):
     
     allowed_domain = ['dinaping.com']
     start_urls = [
-                   "http://www.dianping.com/search/category/1/90/g90p3710"
+                   "http://www.dianping.com/search/category/50/90/g90p3"
                   ]
 
 #     for line in file("dianping/spiders/cityCode.list"):
@@ -42,7 +42,7 @@ class SpiderTmallShop(Spider):
         self.questionIdPatten = re.compile("[0-9]+")
         self.pageUrl = "http://www.dianping.com/search/category/%s/90/g90p%s"
         
-        self.fw = file("pages.list", "w")
+        self.fw = file("pages.list", "a")
         pass
     
     def parse(self, response):
@@ -84,14 +84,13 @@ class SpiderTmallShop(Spider):
                 href = li.xpath(".//p[@class='title']/a[@class='shopname']/@href").extract()[0]
                 item["shop_id"] = href.split("/")[-1]
                 
-                print item
                 shopUrl = "http://www.dianping.com" + href
                 request = Request(shopUrl, callback=self.parse, priority=12345)
                 request.meta["shopDetail"] = copy.deepcopy(item)
                 yield request
                 
-                yieldPageFlag = False
-                break  # for test
+#                 yieldPageFlag = False
+#                 break  # for test
                 pass
             
             if yieldPageFlag:
@@ -143,7 +142,7 @@ class SpiderTmallShop(Spider):
             self.fw.flush()
         
         if response.body.find("门店介绍")!=-1:
-            self.fw.write(response.url +" 地图坐标")
+            self.fw.write(response.url +" 门店介绍")
             self.fw.flush()
         
         try:  
@@ -193,6 +192,7 @@ class SpiderTmallShop(Spider):
        
         item["shop_map_attitude"] = ""
         item["shop_contact_man"] = ""
+        item["shop_description"] = ""
         photoUrl = response.url + "/photos"
         print photoUrl
         request = Request(photoUrl, callback=self.parseMainPhotos, priority=123)
@@ -212,7 +212,6 @@ class SpiderTmallShop(Spider):
         item = response.meta["item"]
         item["image_urls"] = []
         
-        print item
         
         try:
             pic_list = select.xpath(".//a[@class='p-img']/img/@src").extract()

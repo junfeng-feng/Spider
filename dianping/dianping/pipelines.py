@@ -43,7 +43,7 @@ class DianpingPipeline(object):
         return item
     
     def insertTmallShopSql(self, tx, item):
-        item["shop_img"] = ",".join( [path["path"] for path in item["images"]])
+        item["shop_img"] = ",".join( [path["path"][4:] for path in item["images"]])
         if item["shop_flag"] == "yes":
             try:
                 tx.execute(self.insertQuestionSql,
@@ -60,7 +60,6 @@ class DianpingPipeline(object):
                         item["shop_tag"],
                         item["shop_map_attitude"],
                         item["shop_contact_man"],
-                        item["shop_subway_line"],
                         item["shop_bus_line"],
                         item["shop_description"],
                         item["city_id"],
