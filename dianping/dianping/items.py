@@ -12,7 +12,7 @@ class DianpingItem(scrapy.Item):
     # define the fields for your item here like:
     
     shop_flag = scrapy.Field()
-    shop_type = scrapy.Field()
+    shop_template = scrapy.Field()
     # shop
     shop_id = scrapy.Field()
     shop_name = scrapy.Field()

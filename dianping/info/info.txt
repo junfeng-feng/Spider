@@ -4,3 +4,9 @@ http://www.dianping.com/shop/38163569 mainbody---breadcrumb-wrapper 第四种模
 
 2.一个店铺211个图片
 http://www.dianping.com/shop/10663715
+
+
+1.http://www.dianping.com/shop/18097023 [Main]
+2.http://www.dianping.com/shop/43555238 [MainBody]
+3.http://www.dianping.com/shop/38163569 [Mainbody--breadcrumb-wrapper]
+4.http://www.dianping.com/shop/2345434  [Body]

@@ -133,7 +133,8 @@ class SpiderTmallShop(Spider):
 
     def parseMain(self, select, response, item):
         print "parseMain"       
-        item["shop_type"] = "main"
+        item["shop_template"] = "parseMain"
+        
         if response.body.find("地图坐标")!=-1:
             self.fw.write(response.url +" 地图坐标------------------------------")
             self.fw.flush()
@@ -196,8 +197,8 @@ class SpiderTmallShop(Spider):
         item["shop_map_attitude"] = ""
         item["shop_contact_man"] = ""
         item["shop_description"] = ""
+        
         photoUrl = response.url + "/photos"
-        print photoUrl
         request = Request(photoUrl, callback=self.parseMainPhotos, priority=123)
         request.meta["item"] = copy.deepcopy(item)
         return request
@@ -212,12 +213,10 @@ class SpiderTmallShop(Spider):
         item = response.meta["item"]
         item["image_urls"] = []
         try:
-            pic_list = select.xpath(".//a[@class='p-img']/img/@src").extract()
-            for pic in pic_list:
-                # wrong toto
-                item["image_urls"].append(pic)
+            item["image_urls"] = select.xpath(".//a[@class='p-img']/img/@src").extract()
         except Exception, e:
             print e
+
         item["shop_flag"] = "yes"
         yield item
         pass
@@ -229,7 +228,7 @@ class SpiderTmallShop(Spider):
 #         self.fw.write(response.url + "\tparseMainBody\n")
 #         self.fw.flush()
 
-        item["shop_type"] = "mainbody"
+        item["shop_template"] = "parseMainBody"
         print "parseMainBody"
         
         item["shop_domain"] = ""
@@ -282,37 +281,30 @@ class SpiderTmallShop(Spider):
         except Exception, e: 
             print e
        
-        item["shop_bus_line"] = "" # TODO
-        item["shop_map_attitude"] = ""
-        item["shop_contact_man"] = ""
         
         item["image_urls"] = []
         try:
-            pic_list = select.xpath(".//div[@class='slidephotos J_small']/img/@src").extract()
-            for pic in pic_list:
-                # wrong toto
-                item["image_urls"].append(pic)
+            item["image_urls"] = select.xpath(".//div[@class='slidephotos J_small']/img/@src").extract()
         except Exception, e:
             print e
+
+        item["shop_bus_line"] = "" # TODO
+        item["shop_map_attitude"] = ""
+        item["shop_contact_man"] = ""
+
         item["shop_flag"] = "yes"
-        
         return item
-#         photoUrl = response.url + "/photos"
-#         print photoUrl
-#         request = Request(photoUrl, callback=self.parseMainPhotos, priority=123)
-#         request.meta["item"] = copy.deepcopy(item)
-#         return request
         pass
     
     def parseBody(self, select, response, item):
-        self.fw.write(response.url + "\parseBody\n")
-        self.fw.flush()
+#         self.fw.write(response.url + "\parseBody\n")
+#         self.fw.flush()
         
-        item["shop_type"] = "body"
+        item["shop_template"] = "parseBody"
         pass
     
     def parseBreadcrumb_wrapper(self, select, response, item):
-        item["shop_type"] = "parseBreadcrumb_wrapper"
+        item["shop_template"] = "parseBreadcrumb_wrapper"
         print "parseBreadcrumb_wrapper"
 #         self.fw.write(response.url + "\tparseMainBody\n")
 #         self.fw.flush()
@@ -368,18 +360,17 @@ class SpiderTmallShop(Spider):
         except Exception, e: 
             print e
        
-        item["shop_bus_line"] = ""
-        item["shop_map_attitude"] = ""
-        item["shop_contact_man"] = ""
         
         item["image_urls"] = []
         try:
-            pic_list = select.xpath(".//div[@class='slidephotos J_small']/img/@src").extract()
-            for pic in pic_list:
-                # wrong toto
-                item["image_urls"].append(pic)
+            item["image_urls"] = select.xpath(".//div[@class='slider-wrapper J_wrapPic']/img/@src").extract()
         except Exception, e:
             print e
+
+        item["shop_bus_line"] = ""
+        item["shop_map_attitude"] = ""
+        item["shop_contact_man"] = ""
+            
         item["shop_flag"] = "yes"
         
         return item

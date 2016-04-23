@@ -10,8 +10,8 @@ class DianpingPipeline(object):
         self.insertQuestionSql = r"""INSERT INTO `dianping_shop` 
         (`shop_id`, `shop_name`, `shop_img`, `shop_area`, `shop_domain`, `shop_category`, `shop_cityname`, `shop_address`, 
         `shop_telphone`, `shop_open_time`, `shop_tag`, `shop_map_attitude`, `shop_contact_man`, 
-         `shop_bus_line`, `shop_description`, `city_id`) VALUES
-(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+         `shop_bus_line`, `shop_description`, `city_id`, `shop_template`) VALUES
+(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
 """
         self.insertAnswerSql = r"""INSERT INTO `ask_tobato_answer` 
         (`answer_id`, `question_id`, `answer_content`, `answer_img`, `is_best`) VALUES
@@ -67,6 +67,7 @@ class DianpingPipeline(object):
                         item["shop_bus_line"],
                         item["shop_description"],
                         item["city_id"],
+                        item['shop_template'],
                         ))
             except Exception, e:
                 print e
