@@ -1,22 +1,22 @@
---
--- 表的结构 `dianping_shop`
---
 
-CREATE TABLE IF NOT EXISTS `dianping_shop` (
+
+CREATE TABLE `dianping_shop` (
   `shop_id` varchar(64) NOT NULL COMMENT '门店ID',
-  `shop_name` varchar(64) ,
-  `shop_img` varchar(64) ,
-  `shop_area` varchar(64)  COMMENT '店铺地区',
-  `shop_domain` varchar(64)  COMMENT '店铺区域',
-  `shop_address` varchar(64)  COMMENT '门店所在地',
-  `shop_telphone` varchar(16) ,
-  `shop_open_time` varchar(64) ,
-  `shop_tag` varchar(64) ,
-  `shop_map_attitude` varchar(64)  COMMENT '地图坐标',
-  `shop_contact_man` varchar(64) ,
-  `shop_subway_line` varchar(64) ,
-  `shop_bus_line` varchar(64) ,
-  `shop_description` varchar(64) ,
+  `shop_name` varchar(64) DEFAULT NULL,
+  `shop_img` text,
+  `shop_area` varchar(64) DEFAULT NULL COMMENT '店铺地区',
+  `shop_domain` varchar(64) DEFAULT NULL COMMENT '店铺区域',
+  `shop_category` varchar(64) DEFAULT NULL,
+  `shop_cityname` varchar(64) DEFAULT NULL,
+  `shop_address` varchar(64) DEFAULT NULL COMMENT '门店所在地',
+  `shop_telphone` varchar(16) DEFAULT NULL,
+  `shop_open_time` varchar(64) DEFAULT NULL,
+  `shop_tag` varchar(64) DEFAULT NULL,
+  `shop_map_attitude` varchar(64) DEFAULT NULL COMMENT '地图坐标',
+  `shop_contact_man` varchar(64) DEFAULT NULL,
+  `shop_bus_line` varchar(64) DEFAULT NULL,
+  `shop_description` varchar(64) DEFAULT NULL,
+  `city_id` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`shop_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
