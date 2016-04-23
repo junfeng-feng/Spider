@@ -25,15 +25,17 @@ class SpiderTmallShop(Spider):
     
     allowed_domain = ['dinaping.com']
     start_urls = [
-                   "http://www.dianping.com/search/category/1/90/g90p5"
+#                    "http://www.dianping.com/search/category/1/90/g90p50",
+#                    "http://www.dianping.com/search/category/1/90/g90p31"
                   ]
 
 #     for line in file("dianping/spiders/cityCode.list"):
 #         line  = line.strip().split("\n")
 #         cityCode = line[0]
-        
-#     for id in xrange(0, 2900):
-#         start_urls.append("http://www.dianping.com/search/category/%s/90/g90p50" % id)
+
+    #1~2506都是cityCode        
+    for id in xrange(1, 2510):
+        start_urls.append("http://www.dianping.com/search/category/%s/90/g90p1" % id)
         
     def __init__(self):
         self.questionIdPatten = re.compile("[0-9]+")
@@ -94,6 +96,11 @@ class SpiderTmallShop(Spider):
                 # 如果当前页有数据，则继续请求下一页
                 # 翻页DONE
                 nextPageNumber = int(pageNumber) + 1
+                
+                #for test 测试数据，取前三页
+                if nextPageNumber >= 3:
+                    return
+                
                 url = self.pageUrl % (cityId, nextPageNumber)
                 request = Request(url, callback=self.parse, priority=1234)
                 yield request
@@ -119,6 +126,7 @@ class SpiderTmallShop(Spider):
                 pass
             elif len(breadcrumb_wrapper)> 0: #优先级比manBody高
                 yield self.parseBreadcrumb_wrapper(select, response, item)
+                pass
             elif len(mainBody) > 0:
                 yield self.parseMainBody(select, response, item)
                 pass
@@ -127,13 +135,13 @@ class SpiderTmallShop(Spider):
                 pass
             else:
                 # 未识别的url
-                self.fw.write(response.url + "\tunknown-------------\n")
+                self.fw.write(response.url + "\t unknown-------------\n")
                 self.fw.flush()
             pass
 
     def parseMain(self, select, response, item):
         print "parseMain"       
-        item["shop_template"] = "parseMain"
+        item["shop_template"] = "Main"
         
         if response.body.find("地图坐标")!=-1:
             self.fw.write(response.url +" 地图坐标------------------------------")
@@ -228,7 +236,7 @@ class SpiderTmallShop(Spider):
 #         self.fw.write(response.url + "\tparseMainBody\n")
 #         self.fw.flush()
 
-        item["shop_template"] = "parseMainBody"
+        item["shop_template"] = "MainBody"
         print "parseMainBody"
         
         item["shop_domain"] = ""
@@ -297,14 +305,95 @@ class SpiderTmallShop(Spider):
         pass
     
     def parseBody(self, select, response, item):
-#         self.fw.write(response.url + "\parseBody\n")
-#         self.fw.flush()
+        self.fw.write(response.url + "\parseBody\n")
+        self.fw.flush()
         
-        item["shop_template"] = "parseBody"
+        item["shop_template"] = "Body"
+        try:  
+            breadcrumb = select.xpath(".//div[@class='breadcrumb']/a/text()").extract()
+            breadcrumb = [a.strip() for a in breadcrumb]
+            item["shop_domain"] = breadcrumb[0]
+            
+            allBread = select.xpath(".//div[@class='breadcrumb']/a/@href").extract()[1:]#去掉第一个shop_domain
+            
+            shop_area_count = len([a for a in allBread if a.split("/")[-1].startswith("r")])
+            shop_category_count = len([a for a in allBread if a.split("/")[-1].startswith("g")])
+                        
+            item["shop_area"] = ",".join(breadcrumb[1:1+shop_area_count])
+            item["shop_category"] = ",".join(breadcrumb[1+shop_area_count: 1+shop_area_count + shop_category_count])
+        except Exception, e:
+            item["shop_domain"] = ""
+            item["shop_area"] = ""
+            item["shop_category"] = ""
+            print e
+
+        
+#         self.fw.write(response.url + "\tparseMain\n")
+#         self.fw.flush()
+        # shop info
+        try:
+            addressPrefix = select.xpath(".//span[@itemprop='locality region']/text()").extract()[0].strip()
+            address = select.xpath(".//span[@itemprop='street-address']/text()").extract()[0].strip()
+            item["shop_address"] = addressPrefix + address
+        except Exception, e:
+            item["shop_address"] = ""
+            print e
+            
+        try:
+            item['shop_telphone'] = select.xpath(".//span[@itemprop='tel']/text()").extract()[0]
+        except Exception, e:
+            item['shop_telphone'] = ""
+            print e
+#              
+#         # shop bus and other info
+        
+        item["shop_open_time"] = ""
+        item["shop_bus_line"] = ""
+        item["shop_description"] = ""
+        
+        try:
+            otherInfo = select.xpath(".//div[@class='other J-other Hide']/p[@class='info info-indent']")
+            for li in otherInfo:
+                html = li.extract()
+                if html.find("营业") != -1:
+                    item["shop_open_time"] = li.xpath(".//span/text()")[1].extract().strip()
+                elif html.find("公交") != -1:
+                    self.fw.write("body bus line info---------")
+#                     item["shop_bus_line"] = li.xpath(".//dd/span/text()").extract()[0]
+                elif html.find("商户简介") != -1:
+                    item["shop_description"] = li.xpath(".//text()").extract()[2].strip()
+                pass
+        except Exception, e:
+            print e
+       
+        item["shop_map_attitude"] = ""
+        item["shop_contact_man"] = ""
+        
+        photoUrl = response.url + "/photos"
+        request = Request(photoUrl, callback=self.parseMainBodyPhotos, priority=123)
+        request.meta["item"] = copy.deepcopy(item)
+        return request
+
+    #===========================================================================
+    # parseMainPhotos
+    # return [item, request]
+    #===========================================================================
+    def parseMainBodyPhotos(self, response):
+        # 解析 http://www.dianping.com/shop/18097023/photos
+        select = Selector(response)
+        item = response.meta["item"]
+        item["image_urls"] = []
+        try:
+            item["image_urls"] = select.xpath(".//div[@class='picture-list']//img/@src").extract()
+        except Exception, e:
+            print e
+
+        item["shop_flag"] = "yes"
+        yield item
         pass
     
     def parseBreadcrumb_wrapper(self, select, response, item):
-        item["shop_template"] = "parseBreadcrumb_wrapper"
+        item["shop_template"] = "MainBodyBreadcrumb-wrapper"
         print "parseBreadcrumb_wrapper"
 #         self.fw.write(response.url + "\tparseMainBody\n")
 #         self.fw.flush()
