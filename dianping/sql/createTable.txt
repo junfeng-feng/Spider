@@ -21,6 +21,7 @@ CREATE TABLE `dianping_shop` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+
 --
 -- 表的结构 `dianping_rate`
 --
