@@ -140,6 +140,8 @@ class SpiderTmallShop(Spider):
             pass
 
     def parseMain(self, select, response, item):
+        self.fw.write(response.url + "\tparseMain\n")
+
         print "parseMain"       
         item["shop_template"] = "Main"
         
@@ -169,8 +171,7 @@ class SpiderTmallShop(Spider):
             print e
 
         
-#         self.fw.write(response.url + "\tparseMain\n")
-#         self.fw.flush()
+
         # shop info
         try:
             addressPrefix = select.xpath(".//span[@class='region']/text()").extract()[0]
@@ -233,7 +234,7 @@ class SpiderTmallShop(Spider):
     # parseMainBody
     #===========================================================================
     def parseMainBody(self, select, response, item):
-#         self.fw.write(response.url + "\tparseMainBody\n")
+        self.fw.write(response.url + "\tparseMainBody\n")
 #         self.fw.flush()
 
         item["shop_template"] = "MainBody"
@@ -395,7 +396,8 @@ class SpiderTmallShop(Spider):
     def parseBreadcrumb_wrapper(self, select, response, item):
         item["shop_template"] = "MainBodyBreadcrumb-wrapper"
         print "parseBreadcrumb_wrapper"
-#         self.fw.write(response.url + "\tparseMainBody\n")
+        
+        self.fw.write(response.url + " MainBodyBreadcrumb-wrapper\n")
 #         self.fw.flush()
         
         item["shop_domain"] = ""
@@ -452,7 +454,7 @@ class SpiderTmallShop(Spider):
         
         item["image_urls"] = []
         try:
-            item["image_urls"] = select.xpath(".//div[@class='slider-wrapper J_wrapPic']/img/@src").extract()
+            item["image_urls"] = select.xpath(".//div[@class='slider-wrapper J_wrapPic']//img/@src").extract()
         except Exception, e:
             print e
 

@@ -1,12 +1,16 @@
 1.点评第四种模板
-
 http://www.dianping.com/shop/38163569 mainbody---breadcrumb-wrapper 第四种模板
 
-2.一个店铺211个图片
+2.一个店铺211个图片,是否翻页获取所有照片
 http://www.dianping.com/shop/10663715
 
+3.MainBody 地图，联系人，没有找到样例
+
+4. Body http://www.dianping.com/shop/11162894 及 MainBody http://www.dianping.com/shop/43555238
+   的公交路线，是js获取的，需要添加selenuim和phantomjs来模拟浏览器执行。抓取速度回严重降低
 
 1.http://www.dianping.com/shop/18097023 [Main]
 2.http://www.dianping.com/shop/43555238 [MainBody]
 3.http://www.dianping.com/shop/38163569 [Mainbody--breadcrumb-wrapper]
 4.http://www.dianping.com/shop/2345434  [Body]
+
