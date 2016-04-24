@@ -223,6 +223,9 @@ class SpiderTmallShop(Spider):
         item["image_urls"] = []
         try:
             item["image_urls"] = select.xpath(".//a[@class='p-img']/img/@src").extract()
+            #最多去十张图片
+            if len(item["image_urls"]) > 10:
+                item["image_urls"] = item["image_urls"][:10]
         except Exception, e:
             print e
 
@@ -294,6 +297,8 @@ class SpiderTmallShop(Spider):
         item["image_urls"] = []
         try:
             item["image_urls"] = select.xpath(".//div[@class='slidephotos J_small']/img/@src").extract()
+            if len(item["image_urls"]) > 10:
+                item["image_urls"] = item["image_urls"][:10]
         except Exception, e:
             print e
 
@@ -386,6 +391,8 @@ class SpiderTmallShop(Spider):
         item["image_urls"] = []
         try:
             item["image_urls"] = select.xpath(".//div[@class='picture-list']//img/@src").extract()
+            if len(item["image_urls"]) > 10:
+                item["image_urls"] = item["image_urls"][:10]
         except Exception, e:
             print e
 
@@ -455,6 +462,8 @@ class SpiderTmallShop(Spider):
         item["image_urls"] = []
         try:
             item["image_urls"] = select.xpath(".//div[@class='slider-wrapper J_wrapPic']//img/@src").extract()
+            if len(item["image_urls"]) > 10:
+                item["image_urls"] = item["image_urls"][:10]
         except Exception, e:
             print e
 

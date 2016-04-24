@@ -2,11 +2,14 @@
 import scrapy
 import MySQLdb.cursors
 from twisted.enterprise import adbapi
+import os
+import shutil
 import logging
 
 class DianpingPipeline(object):
     def __init__(self, dbargs):
         self.dbargs = dbargs
+        
         self.insertQuestionSql = r"""INSERT INTO `dianping_shop` 
         (`shop_id`, `shop_name`, `shop_img`, `shop_area`, `shop_domain`, `shop_category`, `shop_cityname`, `shop_address`, 
         `shop_telphone`, `shop_open_time`, `shop_tag`, `shop_map_attitude`, `shop_contact_man`, 
@@ -43,9 +46,20 @@ class DianpingPipeline(object):
         return item
     
     def insertTmallShopSql(self, tx, item):
+        
         if item["shop_flag"] == "yes":
             if len(item["images"]) > 0:
-                item["shop_img"] = ",".join(["shop/dp" + path["path"][4:] for path in item["images"]])
+                #创建shopid 目录
+                imgPath = "./shop/dp/" + item["shop_id"]
+                if not os.path.exists(imgPath):
+                    os.makedirs(imgPath)
+                
+                #移动图片到新目录
+                for path in item["images"]:
+                    oldPath = "./img/" + path["path"] 
+                    shutil.move(oldPath, imgPath + path["path"][4:])
+                
+                item["shop_img"] = ",".join(["shop/dp/" + item["shop_id"] + path["path"][4:] for path in item["images"]])
             else:
                 item["shop_img"] = ""
 
