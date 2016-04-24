@@ -9,6 +9,7 @@ import json
 import copy
 import uuid
 import sys
+from Finder.Finder_items import item
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -26,14 +27,14 @@ class SpiderTmallShop(Spider):
     allowed_domain = ['dinaping.com']
     start_urls = [
 #                    "http://www.dianping.com/search/category/1/90/g90p50",
-#                    "http://www.dianping.com/search/category/1/90/g90p31"
+                    "http://www.dianping.com/search/category/1/90/g90p31"
                   ]
 
 #     for line in file("dianping/spiders/cityCode.list"):
 #         line  = line.strip().split("\n")
 #         cityCode = line[0]
 
-    #1~2506都是cityCode        
+    # 1~2506都是cityCode        
     for id in xrange(1, 2510):
         start_urls.append("http://www.dianping.com/search/category/%s/90/g90p1" % id)
         
@@ -97,8 +98,8 @@ class SpiderTmallShop(Spider):
                 # 翻页DONE
                 nextPageNumber = int(pageNumber) + 1
                 
-                #for test 测试数据，取前三页
-                if nextPageNumber >= 3:
+                # for test 测试数据，取前三页
+                if nextPageNumber >= 30:
                     return
                 
                 url = self.pageUrl % (cityId, nextPageNumber)
@@ -116,61 +117,64 @@ class SpiderTmallShop(Spider):
             breadcrumb_wrapper = select.xpath(".//div[@class='breadcrumb-wrapper']")
             body = select.xpath(".//div[@id='body']")
             
-            
             print main
             print mainBody
             print body
             
+            result = None
             if len(main) > 0:
-                yield self.parseMain(select, response, item)
+#                 result = self.parseMain(select, response, item)
                 pass
-            elif len(breadcrumb_wrapper)> 0: #优先级比manBody高
-                yield self.parseBreadcrumb_wrapper(select, response, item)
+            elif len(breadcrumb_wrapper) > 0:  # 优先级比manBody高
+                result = self.parseBreadcrumb_wrapper(select, response, item)
                 pass
             elif len(mainBody) > 0:
-                yield self.parseMainBody(select, response, item)
+#                 result = self.parseMainBody(select, response, item)
                 pass
             elif len(body) > 0 :
-                yield self.parseBody(select, response, item)
+#                 result = self.parseBody(select, response, item)
                 pass
             else:
                 # 未识别的url
                 self.fw.write(response.url + "\t unknown-------------\n")
                 self.fw.flush()
+                
+            if result:
+                for itemOrRequest in result:
+                    yield itemOrRequest
             pass
 
     def parseMain(self, select, response, item):
         self.fw.write(response.url + "\tparseMain\n")
 
+        result = []
         print "parseMain"       
         item["shop_template"] = "Main"
         
-        if response.body.find("地图坐标")!=-1:
-            self.fw.write(response.url +" 地图坐标------------------------------")
-            self.fw.flush()
-        
-        if response.body.find("门店介绍")!=-1:
-            self.fw.write(response.url +" 门店介绍------------------------------")
-            self.fw.flush()
+#         if response.body.find("地图坐标")!=-1:
+#             self.fw.write(response.url +" 地图坐标------------------------------")
+#             self.fw.flush()
+#         
+#         if response.body.find("门店介绍")!=-1:
+#             self.fw.write(response.url +" 门店介绍------------------------------")
+#             self.fw.flush()
         
         try:  
             breadcrumb = select.xpath(".//div[@class='breadcrumb']/b/a/span/text()").extract()
             item["shop_domain"] = breadcrumb[0]
             
-            allBread = select.xpath(".//div[@class='breadcrumb']/b/a/@href").extract()[1:]#去掉第一个shop_domain
+            allBread = select.xpath(".//div[@class='breadcrumb']/b/a/@href").extract()[1:]  # 去掉第一个shop_domain
             
             shop_area_count = len([a for a in allBread if a.split("/")[-1].startswith("r")])
             shop_category_count = len([a for a in allBread if a.split("/")[-1].startswith("g")])
                         
-            item["shop_area"] = ",".join(breadcrumb[1:1+shop_area_count])
-            item["shop_category"] = ",".join(breadcrumb[1+shop_area_count: 1+shop_area_count + shop_category_count])
+            item["shop_area"] = ",".join(breadcrumb[1:1 + shop_area_count])
+            item["shop_category"] = ",".join(breadcrumb[1 + shop_area_count: 1 + shop_area_count + shop_category_count])
         except Exception, e:
             item["shop_domain"] = ""
             item["shop_area"] = ""
             item["shop_category"] = ""
             print e
-
-        
 
         # shop info
         try:
@@ -210,8 +214,31 @@ class SpiderTmallShop(Spider):
         photoUrl = response.url + "/photos"
         request = Request(photoUrl, callback=self.parseMainPhotos, priority=123)
         request.meta["item"] = copy.deepcopy(item)
-        return request
+        # return request
+        result.append(request)
 
+        # 评价，需要返回list，在上层，使用for yield
+        rateList = select.xpath(".//ul[@id='reviewCommentId']/li")
+        for li in rateList:
+            rateItem = self.initRateItem(item)
+            
+            rateItem["rate_content"] = li.xpath(".//div[@class='comment-entry']/div/text()").extract()[0]
+            rateItem["rate_datetime"] = li.xpath(".//span[@class='time']/text()").extract()[0]
+            rateItem["user_nickname"] = li.xpath(".//div[@class='user-info']/a/text()").extract()[0]
+            user_photo_url = li.xpath(".//a[@class='avatar J_card']/img/@src").extract()[0]
+            
+            # 第一个存放头像
+            rateItem["image_urls"] = [user_photo_url]
+            
+            try:
+                rateItem["image_urls"] += li.xpath(".//ul[@class='shop-info-gallery']/li/a/img/@src").extract()
+            except Exception, e:
+                print e
+            
+            result.append(rateItem)
+            pass
+        
+        return result
     #===========================================================================
     # parseMainPhotos
     # return [item, request]
@@ -223,7 +250,7 @@ class SpiderTmallShop(Spider):
         item["image_urls"] = []
         try:
             item["image_urls"] = select.xpath(".//a[@class='p-img']/img/@src").extract()
-            #最多去十张图片
+            # 最多去十张图片
             if len(item["image_urls"]) > 10:
                 item["image_urls"] = item["image_urls"][:10]
         except Exception, e:
@@ -239,7 +266,7 @@ class SpiderTmallShop(Spider):
     def parseMainBody(self, select, response, item):
         self.fw.write(response.url + "\tparseMainBody\n")
 #         self.fw.flush()
-
+        result = []
         item["shop_template"] = "MainBody"
         print "parseMainBody"
         
@@ -251,13 +278,13 @@ class SpiderTmallShop(Spider):
             breadcrumb = select.xpath(".//div[@class='breadcrumb']/b/a/span/text()").extract()
             item["shop_domain"] = breadcrumb[0]
             
-            allBread = select.xpath(".//div[@class='breadcrumb']/b/a/@href").extract()[1:]#去掉第一个shop_domain
+            allBread = select.xpath(".//div[@class='breadcrumb']/b/a/@href").extract()[1:]  # 去掉第一个shop_domain
             
             shop_area_count = len([a for a in allBread if a.split("/")[-1].startswith("r")])
             shop_category_count = len([a for a in allBread if a.split("/")[-1].startswith("g")])
                         
-            item["shop_area"] = ",".join(breadcrumb[1:1+shop_area_count])
-            item["shop_category"] = ",".join(breadcrumb[1+shop_area_count: 1+shop_area_count + shop_category_count])
+            item["shop_area"] = ",".join(breadcrumb[1:1 + shop_area_count])
+            item["shop_category"] = ",".join(breadcrumb[1 + shop_area_count: 1 + shop_area_count + shop_category_count])
         except Exception, e:
             print e
 
@@ -280,7 +307,7 @@ class SpiderTmallShop(Spider):
 #         # shop bus and other info
         
         item["shop_open_time"] = ""
-        item["shop_description"] =""
+        item["shop_description"] = ""
         try:
             showWrap = select.xpath(".//div[@class='con J_showWarp']//tr")
             for li in showWrap:
@@ -302,31 +329,36 @@ class SpiderTmallShop(Spider):
         except Exception, e:
             print e
 
-        item["shop_bus_line"] = "" # TODO
+        item["shop_bus_line"] = ""  # TODO
         item["shop_map_attitude"] = ""
         item["shop_contact_man"] = ""
 
         item["shop_flag"] = "yes"
-        return item
+        # return item
+        result.append(item)
+        
+
+        return result
         pass
     
     def parseBody(self, select, response, item):
         self.fw.write(response.url + "\parseBody\n")
         self.fw.flush()
         
+        result = []
         item["shop_template"] = "Body"
         try:  
             breadcrumb = select.xpath(".//div[@class='breadcrumb']/a/text()").extract()
             breadcrumb = [a.strip() for a in breadcrumb]
             item["shop_domain"] = breadcrumb[0]
             
-            allBread = select.xpath(".//div[@class='breadcrumb']/a/@href").extract()[1:]#去掉第一个shop_domain
+            allBread = select.xpath(".//div[@class='breadcrumb']/a/@href").extract()[1:]  # 去掉第一个shop_domain
             
             shop_area_count = len([a for a in allBread if a.split("/")[-1].startswith("r")])
             shop_category_count = len([a for a in allBread if a.split("/")[-1].startswith("g")])
                         
-            item["shop_area"] = ",".join(breadcrumb[1:1+shop_area_count])
-            item["shop_category"] = ",".join(breadcrumb[1+shop_area_count: 1+shop_area_count + shop_category_count])
+            item["shop_area"] = ",".join(breadcrumb[1:1 + shop_area_count])
+            item["shop_category"] = ",".join(breadcrumb[1 + shop_area_count: 1 + shop_area_count + shop_category_count])
         except Exception, e:
             item["shop_domain"] = ""
             item["shop_area"] = ""
@@ -378,7 +410,9 @@ class SpiderTmallShop(Spider):
         photoUrl = response.url + "/photos"
         request = Request(photoUrl, callback=self.parseMainBodyPhotos, priority=123)
         request.meta["item"] = copy.deepcopy(item)
-        return request
+        # return request
+        result.append(request)
+        return result
 
     #===========================================================================
     # parseMainPhotos
@@ -406,7 +440,8 @@ class SpiderTmallShop(Spider):
         
         self.fw.write(response.url + " MainBodyBreadcrumb-wrapper\n")
 #         self.fw.flush()
-        
+
+        result = []
         item["shop_domain"] = ""
         item["shop_area"] = ""
         item["shop_category"] = ""
@@ -415,13 +450,13 @@ class SpiderTmallShop(Spider):
             breadcrumb = select.xpath(".//div[@class='breadcrumb-wrapper']/ul/li/a/text()").extract()
             item["shop_domain"] = breadcrumb[0]
             
-            allBread = select.xpath(".//div[@class='breadcrumb-wrapper']/ul/li/a/@href").extract()[1:]#去掉第一个shop_domain
+            allBread = select.xpath(".//div[@class='breadcrumb-wrapper']/ul/li/a/@href").extract()[1:]  # 去掉第一个shop_domain
             
             shop_area_count = len([a for a in allBread if a.split("/")[-1].startswith("r")])
             shop_category_count = len([a for a in allBread if a.split("/")[-1].startswith("g")])
                         
-            item["shop_area"] = ",".join(breadcrumb[1:1+shop_area_count])
-            item["shop_category"] = ",".join(breadcrumb[1+shop_area_count: 1+shop_area_count + shop_category_count])
+            item["shop_area"] = ",".join(breadcrumb[1:1 + shop_area_count])
+            item["shop_category"] = ",".join(breadcrumb[1 + shop_area_count: 1 + shop_area_count + shop_category_count])
         except Exception, e:
             print e
 
@@ -448,11 +483,11 @@ class SpiderTmallShop(Spider):
         item["shop_open_time"] = ""
         
         try:
-            item["shop_open_time"] =select.xpath(".//div[@class='business-card clearfix']//tr/td/text()").extract()[1]
+            item["shop_open_time"] = select.xpath(".//div[@class='business-card clearfix']//tr/td/text()").extract()[1]
         except Exception, e: 
             print e
         
-        item["shop_description"] =""
+        item["shop_description"] = ""
         try:
             item["shop_description"] = "|".join([text.strip() for text in select.xpath(".//div[@class='business-card clearfix']/p//text()").extract()]).strip("|")
         except Exception, e: 
@@ -473,10 +508,45 @@ class SpiderTmallShop(Spider):
             
         item["shop_flag"] = "yes"
         
-        return item
+        # return item
+        result.append(item)
+        
+        # 评价，需要返回list，在上层，使用for yield
+        rateList = select.xpath(".//div[@class='comment-list']/ul/li")
+        for li in rateList:
+            rateItem = self.initRateItem(item)
+            
+            rateItem["rate_content"] = li.xpath(".//div[@class='desc J_brief-cont']/text()").extract()[0].strip()
+            rateItem["rate_datetime"] = li.xpath(".//span[@class='time']/text()").extract()[0]
+            rateItem["user_nickname"] = li.xpath(".//div[@class='user-info']//a/text()").extract()[0]
+            user_photo_url = li.xpath(".//div[@class='pic']/a[@class='J_card']/img/@data-lazyload").extract()[0]
+            
+            # 第一个存放头像
+            rateItem["image_urls"] = [user_photo_url]
+            try:
+                rateItem["image_urls"] += li.xpath(".//ul/li/a/img/@data-lazyload").extract()
+            except Exception, e:
+                print e
+            
+            result.append(rateItem)
+            pass
+
+        return result
+    
 #         photoUrl = response.url + "/photos"
 #         print photoUrl
 #         request = Request(photoUrl, callback=self.parseMainPhotos, priority=123)
 #         request.meta["item"] = copy.deepcopy(item)
 #         return request
         pass    
+    
+    def initRateItem(self, item):
+        rateItem = DianpingItem()
+        rateItem["shop_id"] = item["shop_id"]
+        rateItem["shop_template"] = item["shop_template"]
+        rateItem["city_id"] = item["city_id"]
+        
+        rateItem["rate_id"] = str(uuid.uuid1())
+        rateItem["image_urls"] = []  # 图片
+        rateItem["shop_flag"] = "no"
+        return rateItem

@@ -15,4 +15,24 @@ http://www.dianping.com/shop/10663715
 4.http://www.dianping.com/shop/2345434  [Body]
 
 5.点评的评论，只取第一页
-6.店铺页面，存放位置：/shop/
+6.店铺页面，存放位置：/shop/dp/shopid/
+7.评论图片 shop/dpc/shopid/dp
+
+
+
+item["shop_id "] = ""
+item["shop_name "] = ""
+item["shop_img "] = ""
+item["shop_area "] = ""
+item["shop_domain "] = ""
+item["shop_category "] = ""
+item["shop_cityname "] = ""
+item["shop_tag "] = ""
+item["shop_address "] = ""
+item["shop_telphone "] = ""
+item["shop_open_time "] = ""
+item["shop_map_attitude "] = ""
+item["shop_contact_man "] = ""
+item["shop_bus_line "] = ""
+item["shop_description "] = ""
+item["city_id "] = ""

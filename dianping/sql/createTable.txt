@@ -25,18 +25,15 @@ CREATE TABLE `dianping_shop` (
 --
 -- 表的结构 `dianping_rate`
 --
-
-CREATE TABLE IF NOT EXISTS `dianping_rate` (
-  `rate_id` varchar(64) NOT NULL ,
-  `user_photo` varchar(64) ,
-  `user_nickname` varchar(64) ,
-  `rate_content` text ,
-  `rate_img` varchar(256)  COMMENT '图片：多图',
-  `rate_datetime` varchar(64) ,
-  `shop_id` varchar(64),
-  PRIMARY KEY (`rate_id`)
+CREATE TABLE `dianping_rate` (
+  `rate_id` varchar(64) NOT NULL,
+  `user_photo` varchar(64) DEFAULT NULL,
+  `user_nickname` varchar(64) DEFAULT NULL,
+  `rate_content` text,
+  `rate_img` text COMMENT '图片：多图',
+  `rate_datetime` varchar(64) DEFAULT NULL,
+  `shop_id` varchar(64) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 --
 -- 转存表中的数据 `dianping_shop`

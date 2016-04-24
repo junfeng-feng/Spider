@@ -16,9 +16,9 @@ class DianpingPipeline(object):
          `shop_bus_line`, `shop_description`, `city_id`, `shop_template`) VALUES
 (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
 """
-        self.insertAnswerSql = r"""INSERT INTO `ask_tobato_answer` 
-        (`answer_id`, `question_id`, `answer_content`, `answer_img`, `is_best`) VALUES
-(%s, %s, %s, %s, %s);"""
+        self.insertAnswerSql = r"""INSERT INTO `dianping_rate` 
+        (`rate_id`, `user_photo`, `user_nickname`, `rate_content`, `rate_img`, `rate_datetime`, `shop_id`, `shop_template`) VALUES
+(%s, %s, %s, %s, %s, %s, %s, %s);"""
     
     def open_spider(self, spider):
         self.dbpool = adbapi.ConnectionPool('MySQLdb', **(self.dbargs))
@@ -49,12 +49,12 @@ class DianpingPipeline(object):
         
         if item["shop_flag"] == "yes":
             if len(item["images"]) > 0:
-                #创建shopid 目录
+                # 创建shopid 目录
                 imgPath = "./shop/dp/" + item["shop_id"]
                 if not os.path.exists(imgPath):
                     os.makedirs(imgPath)
                 
-                #移动图片到新目录
+                # 移动图片到新目录
                 for path in item["images"]:
                     oldPath = "./img/" + path["path"] 
                     shutil.move(oldPath, imgPath + path["path"][4:])
@@ -85,4 +85,39 @@ class DianpingPipeline(object):
                         ))
             except Exception, e:
                 print e
+        else:
+            if len(item["images"]) > 0:
+                # 创建shopid 目录
+                imgPath = "./shop/dpc/" + item["shop_id"] + "/dp"
+                if not os.path.exists(imgPath):
+                    os.makedirs(imgPath)
+                
+                # 移动图片到新目录
+                for path in item["images"]:
+                    oldPath = "./img/" + path["path"] 
+                    shutil.move(oldPath, imgPath + path["path"][4:])
+                
+                item["user_photo"] = "shop/dpc/" + item["shop_id"] + "/dp" + item["images"][0]["path"][4:] 
+                if len(item["images"]) > 1:
+                    item["rate_img"] = ",".join(["shop/dpc/" + item["shop_id"] + "/dp" + path["path"][4:] 
+                                             for path in item["images"][1:]])
+            else:
+                item["rate_img"] = ""
+                item["user_photo"] = ""
+
+            try:
+                tx.execute(self.insertAnswerSql,
+                       (
+                        item["rate_id"],
+                        item["user_photo"],
+                        item["user_nickname"],
+                        item["rate_content"],
+                        item["rate_img"],
+                        item["rate_datetime"],
+                        item["shop_id"],
+                        item["shop_template"],
+                        ))
+            except Exception, e:
+                print e
             pass
+        
