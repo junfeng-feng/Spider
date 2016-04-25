@@ -57,7 +57,7 @@ class DianpingPipeline(object):
                 # 移动图片到新目录
                 for path in item["images"]:
                     oldPath = "./img/" + path["path"] 
-                    shutil.move(oldPath, imgPath + path["path"][4:])
+                    shutil.copy(oldPath, imgPath + path["path"][4:])
                 
                 item["shop_img"] = ",".join(["shop/dp/" + item["shop_id"] + path["path"][4:] for path in item["images"]])
             else:

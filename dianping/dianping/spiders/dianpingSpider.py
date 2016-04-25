@@ -94,6 +94,8 @@ class SpiderTmallShop(Spider):
 #                 break  # for test
                 pass
             
+            #for test 不翻页
+            yieldPageFlag = False
             if yieldPageFlag:
                 # 如果当前页有数据，则继续请求下一页
                 # 翻页DONE
