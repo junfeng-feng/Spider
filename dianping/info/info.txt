@@ -18,6 +18,10 @@ http://www.dianping.com/shop/10663715
 6.店铺页面，存放位置：/shop/dp/shopid/
 7.评论图片 shop/dpc/shopid/dp
 
+shop/dpc/评论的
+shop/dpa/头像的
+shop/dp/店铺的
+
 
 
 item["shop_id "] = ""

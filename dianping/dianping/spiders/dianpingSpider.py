@@ -27,13 +27,14 @@ class SpiderTmallShop(Spider):
     allowed_domain = ['dinaping.com']
     start_urls = [
 #                    "http://www.dianping.com/search/category/1/90/g90p50",
-                    "http://www.dianping.com/search/category/1/90/g90p31"
+#                     "http://www.dianping.com/search/category/1/90/g90p31"
                   ]
 
 #     for line in file("dianping/spiders/cityCode.list"):
 #         line  = line.strip().split("\n")
 #         cityCode = line[0]
 
+    #TODO 最大翻页数量也要做修改
     # 1~2506都是cityCode        
     for id in xrange(1, 2510):
         start_urls.append("http://www.dianping.com/search/category/%s/90/g90p1" % id)
@@ -85,7 +86,7 @@ class SpiderTmallShop(Spider):
                 item["shop_id"] = href.split("/")[-1]
                 
                 shopUrl = "http://www.dianping.com" + href
-                request = Request(shopUrl, callback=self.parse, priority=12345)
+                request = Request(shopUrl, callback=self.parse, priority=1234567)
                 request.meta["shopDetail"] = copy.deepcopy(item)
                 yield request
                 
@@ -99,11 +100,11 @@ class SpiderTmallShop(Spider):
                 nextPageNumber = int(pageNumber) + 1
                 
                 # for test 测试数据，取前三页
-                if nextPageNumber >= 30:
-                    return
+#                 if nextPageNumber >= 3:
+#                     return
                 
                 url = self.pageUrl % (cityId, nextPageNumber)
-                request = Request(url, callback=self.parse, priority=1234)
+                request = Request(url, callback=self.parse, priority=1234567)
                 yield request
                 
             pass
@@ -123,16 +124,16 @@ class SpiderTmallShop(Spider):
             
             result = None
             if len(main) > 0:
-#                 result = self.parseMain(select, response, item)
+                result = self.parseMain(select, response, item)
                 pass
             elif len(breadcrumb_wrapper) > 0:  # 优先级比manBody高
                 result = self.parseBreadcrumb_wrapper(select, response, item)
                 pass
             elif len(mainBody) > 0:
-#                 result = self.parseMainBody(select, response, item)
+                result = self.parseMainBody(select, response, item)
                 pass
             elif len(body) > 0 :
-#                 result = self.parseBody(select, response, item)
+                result = self.parseBody(select, response, item)
                 pass
             else:
                 # 未识别的url
@@ -212,30 +213,35 @@ class SpiderTmallShop(Spider):
         item["shop_description"] = ""
         
         photoUrl = response.url + "/photos"
-        request = Request(photoUrl, callback=self.parseMainPhotos, priority=123)
+        request = Request(photoUrl, callback=self.parseMainPhotos, priority=1234567)
         request.meta["item"] = copy.deepcopy(item)
         # return request
         result.append(request)
+        
+        
 
         # 评价，需要返回list，在上层，使用for yield
         rateList = select.xpath(".//ul[@id='reviewCommentId']/li")
         for li in rateList:
-            rateItem = self.initRateItem(item)
-            
-            rateItem["rate_content"] = li.xpath(".//div[@class='comment-entry']/div/text()").extract()[0]
-            rateItem["rate_datetime"] = li.xpath(".//span[@class='time']/text()").extract()[0]
-            rateItem["user_nickname"] = li.xpath(".//div[@class='user-info']/a/text()").extract()[0]
-            user_photo_url = li.xpath(".//a[@class='avatar J_card']/img/@src").extract()[0]
-            
-            # 第一个存放头像
-            rateItem["image_urls"] = [user_photo_url]
-            
             try:
-                rateItem["image_urls"] += li.xpath(".//ul[@class='shop-info-gallery']/li/a/img/@src").extract()
-            except Exception, e:
+                rateItem = self.initRateItem(item)
+                
+                rateItem["rate_content"] = li.xpath(".//div[@class='comment-entry']/div/text()").extract()[0]
+                rateItem["rate_datetime"] = li.xpath(".//span[@class='time']/text()").extract()[0]
+                rateItem["user_nickname"] = li.xpath(".//div[@class='user-info']/a/text()").extract()[0]
+                user_photo_url = li.xpath(".//a[@class='avatar J_card']/img/@src").extract()[0]
+                
+                # 第一个存放头像
+                rateItem["image_urls"] = [user_photo_url]
+                
+                try:
+                    rateItem["image_urls"] += li.xpath(".//ul[@class='shop-info-gallery']/li/a/img/@src").extract()
+                except Exception, e:
+                    print e
+                
+                result.append(rateItem)
+            except Exception,e:
                 print e
-            
-            result.append(rateItem)
             pass
         
         return result
@@ -337,6 +343,7 @@ class SpiderTmallShop(Spider):
         # return item
         result.append(item)
         
+        result += self.getMainBodyRate(select)
 
         return result
         pass
@@ -408,10 +415,35 @@ class SpiderTmallShop(Spider):
         item["shop_contact_man"] = ""
         
         photoUrl = response.url + "/photos"
-        request = Request(photoUrl, callback=self.parseMainBodyPhotos, priority=123)
+        request = Request(photoUrl, callback=self.parseMainBodyPhotos, priority=1234567)
         request.meta["item"] = copy.deepcopy(item)
         # return request
         result.append(request)
+        
+        # 评价，需要返回list，在上层，使用for yield
+        rateList = select.xpath(".//ul[@class='comment-list J-list']/li")
+        for li in rateList:
+            try:
+                rateItem = self.initRateItem(item)
+                
+                rateItem["rate_content"] = li.xpath(".//p[@class='desc']").extract()[0][16:-4]
+                rateItem["rate_datetime"] = li.xpath(".//span[@class='time']/text()").extract()[0]
+                rateItem["user_nickname"] = li.xpath(".//a[@class='name']/text()").extract()[0]
+                user_photo_url = li.xpath(".//a[@class='avatar J-avatar']/img/@data-lazyload").extract()[0]
+                
+                # 第一个存放头像
+                rateItem["image_urls"] = [user_photo_url]
+                
+                try:
+                    rateItem["image_urls"] += li.xpath(".//a[@class='item J-photo']/img/@data-lazyload").extract()
+                except Exception, e:
+                    print e
+                
+                result.append(rateItem)
+            except Exception,e:
+                print e
+            pass
+
         return result
 
     #===========================================================================
@@ -511,25 +543,8 @@ class SpiderTmallShop(Spider):
         # return item
         result.append(item)
         
-        # 评价，需要返回list，在上层，使用for yield
-        rateList = select.xpath(".//div[@class='comment-list']/ul/li")
-        for li in rateList:
-            rateItem = self.initRateItem(item)
-            
-            rateItem["rate_content"] = li.xpath(".//div[@class='desc J_brief-cont']/text()").extract()[0].strip()
-            rateItem["rate_datetime"] = li.xpath(".//span[@class='time']/text()").extract()[0]
-            rateItem["user_nickname"] = li.xpath(".//div[@class='user-info']//a/text()").extract()[0]
-            user_photo_url = li.xpath(".//div[@class='pic']/a[@class='J_card']/img/@data-lazyload").extract()[0]
-            
-            # 第一个存放头像
-            rateItem["image_urls"] = [user_photo_url]
-            try:
-                rateItem["image_urls"] += li.xpath(".//ul/li/a/img/@data-lazyload").extract()
-            except Exception, e:
-                print e
-            
-            result.append(rateItem)
-            pass
+        #获取评论
+        result += self.getMainBodyRate(select)
 
         return result
     
@@ -539,6 +554,33 @@ class SpiderTmallShop(Spider):
 #         request.meta["item"] = copy.deepcopy(item)
 #         return request
         pass    
+
+    def getMainBodyRate(self, select):
+        result = []
+        # 评价，需要返回list，在上层，使用for yield
+        rateList = select.xpath(".//div[@class='comment-list']/ul/li")
+        for li in rateList:
+            try:
+                rateItem = self.initRateItem(item)
+                
+                rateItem["rate_content"] = li.xpath(".//div[@class='desc J_brief-cont']").extract()[0][31:-6].strip()
+                rateItem["rate_datetime"] = li.xpath(".//span[@class='time']/text()").extract()[0]
+                rateItem["user_nickname"] = li.xpath(".//div[@class='user-info']//a/text()").extract()[0]
+                user_photo_url = li.xpath(".//div[@class='pic']/a[@class='J_card']/img/@data-lazyload").extract()[0]
+                
+                # 第一个存放头像
+                rateItem["image_urls"] = [user_photo_url]
+                try:
+                    rateItem["image_urls"] += li.xpath(".//ul/li/a/img/@data-lazyload").extract()
+                except Exception, e:
+                    print e
+                
+                result.append(rateItem)
+            except Exception, e:
+                print e
+            pass
+        return result
+        pass
     
     def initRateItem(self, item):
         rateItem = DianpingItem()

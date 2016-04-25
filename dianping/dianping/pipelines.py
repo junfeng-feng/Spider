@@ -88,16 +88,25 @@ class DianpingPipeline(object):
         else:
             if len(item["images"]) > 0:
                 # 创建shopid 目录
-                imgPath = "./shop/dpc/" + item["shop_id"] + "/dp"
+                imgPath = "./shop/dpc/" + item["shop_id"]
                 if not os.path.exists(imgPath):
                     os.makedirs(imgPath)
                 
                 # 移动图片到新目录
-                for path in item["images"]:
+                for path in item["images"][1:]:
                     oldPath = "./img/" + path["path"] 
-                    shutil.move(oldPath, imgPath + path["path"][4:])
+                    shutil.copy(oldPath, imgPath + path["path"][4:])
                 
-                item["user_photo"] = "shop/dpc/" + item["shop_id"] + "/dp" + item["images"][0]["path"][4:] 
+                #创建头像目录
+                userPhotoPath = "./shop/dpa/" + item["shop_id"]
+                if not os.path.exists(userPhotoPath):
+                    os.makedirs(userPhotoPath)
+                    
+                #图片第一个为头像，移动
+                oldPath = "./img/" + item["images"][0]["path"] 
+                shutil.copy(oldPath, userPhotoPath + item["images"][0]["path"][4:])
+
+                item["user_photo"] = "shop/dpa/" + item["shop_id"] + item["images"][0]["path"][4:] 
                 if len(item["images"]) > 1:
                     item["rate_img"] = ",".join(["shop/dpc/" + item["shop_id"] + "/dp" + path["path"][4:] 
                                              for path in item["images"][1:]])
