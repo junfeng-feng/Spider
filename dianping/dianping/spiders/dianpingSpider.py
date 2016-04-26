@@ -36,7 +36,7 @@ class SpiderTmallShop(Spider):
 
     #TODO 最大翻页数量也要做修改
     # 1~2506都是cityCode        
-    for id in xrange(1, 2510):
+    for id in xrange(1, 500):
         start_urls.append("http://www.dianping.com/search/category/%s/90/g90p1" % id)
         
     def __init__(self):
@@ -86,7 +86,7 @@ class SpiderTmallShop(Spider):
                 item["shop_id"] = href.split("/")[-1]
                 
                 shopUrl = "http://www.dianping.com" + href
-                request = Request(shopUrl, callback=self.parse, priority=123456)#店铺请求
+                request = Request(shopUrl, callback=self.parse, priority=22345667)#店铺请求
                 request.meta["shopDetail"] = copy.deepcopy(item)
                 yield request
                 
@@ -101,7 +101,7 @@ class SpiderTmallShop(Spider):
                 nextPageNumber = int(pageNumber) + 1
                 
                 url = self.pageUrl % (cityId, nextPageNumber)
-                request = Request(url, callback=self.parse, priority=12345)
+                request = Request(url, callback=self.parse, priority=1234567)
                 yield request
             pass
         else:
@@ -202,7 +202,7 @@ class SpiderTmallShop(Spider):
         item["shop_description"] = ""
         
         photoUrl = response.url + "/photos"
-        request = Request(photoUrl, callback=self.parseMainPhotos, priority=1234567)
+        request = Request(photoUrl, callback=self.parseMainPhotos, priority=3234567)
         request.meta["item"] = copy.deepcopy(item)
         
         # return request
