@@ -36,7 +36,7 @@ class SpiderTmallShop(Spider):
 
     #TODO 最大翻页数量也要做修改
     # 1~2506都是cityCode        
-    for id in xrange(1, 50):
+    for id in xrange(1, 2510):
         start_urls.append("http://www.dianping.com/search/category/%s/90/g90p1" % id)
         
     def __init__(self):
@@ -95,7 +95,7 @@ class SpiderTmallShop(Spider):
                 pass
             
             #for test 不翻页
-            yieldPageFlag = False
+#             yieldPageFlag = False
             if yieldPageFlag:
                 # 如果当前页有数据，则继续请求下一页
                 nextPageNumber = int(pageNumber) + 1
@@ -121,7 +121,7 @@ class SpiderTmallShop(Spider):
             
             result = None
             if len(main) > 0:
-#                 result = self.parseMain(select, response, item)
+                result = self.parseMain(select, response, item)
                 pass
             elif len(breadcrumb_wrapper) > 0:  # 优先级比manBody高
                 result = self.parseBreadcrumb_wrapper(select, response, item)
@@ -130,7 +130,7 @@ class SpiderTmallShop(Spider):
                 result = self.parseMainBody(select, response, item)
                 pass
             elif len(body) > 0 :
-#                 result = self.parseBody(select, response, item)
+                result = self.parseBody(select, response, item)
                 pass
             else:
                 # 未识别的url
@@ -587,6 +587,7 @@ class SpiderTmallShop(Spider):
 #         return request
         pass    
 
+    
     def getMainBodyRate(self, select):
         rateResult = []
         # 评价，需要返回list，在上层，使用for yield
