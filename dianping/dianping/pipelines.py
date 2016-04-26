@@ -99,7 +99,7 @@ class DianpingPipeline(object):
                     oldPath = "./img/" + item["images"][0]["path"] 
                     shutil.copy(oldPath, userPhotoPath + item["images"][0]["path"][4:])
 
-                    item["user_photo"] = userPhotoPath + item["images"][0]["path"][4:] 
+                    item["user_photo"] = userPhotoPath[2:] + item["images"][0]["path"][4:] 
 
                     # 创建shopid 目录
                     imgPath = "./shop/dpc/" + item["shop_id"]
@@ -112,7 +112,7 @@ class DianpingPipeline(object):
                         shutil.copy(oldPath, imgPath + path["path"][4:])
     
                     if len(item["images"]) > 1:
-                        item["rate_img"] = ",".join([imgPath + path["path"][4:] 
+                        item["rate_img"] = ",".join([imgPath[2:] + path["path"][4:] 
                                                  for path in item["images"][1:]])
                 else:
                     item["rate_img"] = ""
