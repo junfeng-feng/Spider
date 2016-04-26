@@ -46,22 +46,24 @@ class DianpingPipeline(object):
         return item
     
     def insertTmallShopSql(self, tx, item):
-        
         if item["shop_flag"] == "yes":
-            if len(item["images"]) > 0:
-                # 创建shopid 目录
-                imgPath = "./shop/dp/" + item["shop_id"]
-                if not os.path.exists(imgPath):
-                    os.makedirs(imgPath)
-                
-                # 移动图片到新目录
-                for path in item["images"]:
-                    oldPath = "./img/" + path["path"] 
-                    shutil.copy(oldPath, imgPath + path["path"][4:])
-                
-                item["shop_img"] = ",".join(["shop/dp/" + item["shop_id"] + path["path"][4:] for path in item["images"]])
-            else:
-                item["shop_img"] = ""
+            try:
+                if len(item["images"]) > 0:
+                    # 创建shopid 目录
+                    imgPath = "./shop/dp/" + item["shop_id"]
+                    if not os.path.exists(imgPath):
+                        os.makedirs(imgPath)
+                    
+                    # copy图片到新目录
+                    for path in item["images"]:
+                        oldPath = "./img/" + path["path"] 
+                        shutil.copy(oldPath, imgPath + path["path"][4:])
+                    
+                    item["shop_img"] = ",".join(["shop/dp/" + item["shop_id"] + path["path"][4:] for path in item["images"]])
+                else:
+                    item["shop_img"] = ""
+            except Exception, e:
+                print e
 
             try:
                 tx.execute(self.insertQuestionSql,
@@ -86,34 +88,38 @@ class DianpingPipeline(object):
             except Exception, e:
                 print e
         else:
-            if len(item["images"]) > 0:
-                # 创建shopid 目录
-                imgPath = "./shop/dpc/" + item["shop_id"]
-                if not os.path.exists(imgPath):
-                    os.makedirs(imgPath)
-                
-                # 移动图片到新目录
-                for path in item["images"][1:]:
-                    oldPath = "./img/" + path["path"] 
-                    shutil.copy(oldPath, imgPath + path["path"][4:])
-                
-                #创建头像目录
-                userPhotoPath = "./shop/dpa/" + item["shop_id"]
-                if not os.path.exists(userPhotoPath):
-                    os.makedirs(userPhotoPath)
-                    
-                #图片第一个为头像，移动
-                oldPath = "./img/" + item["images"][0]["path"] 
-                shutil.copy(oldPath, userPhotoPath + item["images"][0]["path"][4:])
+            try:
+                if len(item["images"]) > 0:
+                    # 创建头像目录，使用头像ID的首字母作为目录，这样避免头像重复存储
+                    userPhotoPath = "./shop/dpa/" + item["images"][0]["path"][4:][1]
+                    if not os.path.exists(userPhotoPath):
+                        os.makedirs(userPhotoPath)
+                        
+                    # 图片第一个为头像，移动
+                    oldPath = "./img/" + item["images"][0]["path"] 
+                    shutil.copy(oldPath, userPhotoPath + item["images"][0]["path"][4:])
 
-                item["user_photo"] = "shop/dpa/" + item["shop_id"] + item["images"][0]["path"][4:] 
-                if len(item["images"]) > 1:
-                    item["rate_img"] = ",".join(["shop/dpc/" + item["shop_id"] + "/dp" + path["path"][4:] 
-                                             for path in item["images"][1:]])
-            else:
-                item["rate_img"] = ""
-                item["user_photo"] = ""
+                    item["user_photo"] = userPhotoPath + item["images"][0]["path"][4:] 
 
+                    # 创建shopid 目录
+                    imgPath = "./shop/dpc/" + item["shop_id"]
+                    if not os.path.exists(imgPath):
+                        os.makedirs(imgPath)
+
+                    # 移动图片到新目录
+                    for path in item["images"][1:]:
+                        oldPath = "./img/" + path["path"] 
+                        shutil.copy(oldPath, imgPath + path["path"][4:])
+    
+                    if len(item["images"]) > 1:
+                        item["rate_img"] = ",".join([imgPath + path["path"][4:] 
+                                                 for path in item["images"][1:]])
+                else:
+                    item["rate_img"] = ""
+                    item["user_photo"] = ""
+            except Exception, e:
+                print e
+                
             try:
                 tx.execute(self.insertAnswerSql,
                        (
@@ -129,4 +135,3 @@ class DianpingPipeline(object):
             except Exception, e:
                 print e
             pass
-        

@@ -42,7 +42,6 @@ class SpiderTmallShop(Spider):
     def __init__(self):
         self.questionIdPatten = re.compile("[0-9]+")
         self.pageUrl = "http://www.dianping.com/search/category/%s/90/g90p%s"
-        
         self.fw = file("pages.list", "a")
         pass
     
@@ -55,20 +54,21 @@ class SpiderTmallShop(Spider):
             cityId = allNo[0]  # cityid
             pageNumber = allNo[-1]
             
+            #记录page
             self.fw.write("%s cityId:%s, pageNumber：%s\n" % (response.url, cityId, pageNumber))
+            self.fw.flush()
             
             item["city_id"] = cityId
-            
-            yieldPageFlag = False
-            
-            cityName = select.css(".city").xpath("./text()").extract()[0]
-    #         self.fw.write("%s\t%s\n"%(cityId, cityName))
-    #         self.fw.flush()
-    #         
-    #         if response.status == 403:
-    #             sys.exit(0)
-    #             return
+            try:
+                cityName = select.css(".city").xpath("./text()").extract()[0]
+            except Exception,e:
+                cityName=""
+                print e
+                
+#             self.fw.write("%s\t%s\n"%(cityId, cityName))
+#             self.fw.flush()
 
+            yieldPageFlag = False
             shop_list = select.xpath(".//div[@class='info']")
             for li in shop_list:
                 yieldPageFlag = True
@@ -86,7 +86,7 @@ class SpiderTmallShop(Spider):
                 item["shop_id"] = href.split("/")[-1]
                 
                 shopUrl = "http://www.dianping.com" + href
-                request = Request(shopUrl, callback=self.parse, priority=1234567)
+                request = Request(shopUrl, callback=self.parse, priority=123456)#店铺请求
                 request.meta["shopDetail"] = copy.deepcopy(item)
                 yield request
                 
@@ -95,20 +95,14 @@ class SpiderTmallShop(Spider):
                 pass
             
             #for test 不翻页
-            yieldPageFlag = False
+#             yieldPageFlag = False
             if yieldPageFlag:
                 # 如果当前页有数据，则继续请求下一页
-                # 翻页DONE
                 nextPageNumber = int(pageNumber) + 1
                 
-                # for test 测试数据，取前三页
-#                 if nextPageNumber >= 3:
-#                     return
-                
                 url = self.pageUrl % (cityId, nextPageNumber)
-                request = Request(url, callback=self.parse, priority=1234567)
+                request = Request(url, callback=self.parse, priority=12345)
                 yield request
-                
             pass
         else:
             # 店铺页面
@@ -122,6 +116,7 @@ class SpiderTmallShop(Spider):
             
             print main
             print mainBody
+            print breadcrumb_wrapper
             print body
             
             result = None
@@ -149,18 +144,10 @@ class SpiderTmallShop(Spider):
 
     def parseMain(self, select, response, item):
         self.fw.write(response.url + "\tparseMain\n")
+        self.fw.flush()
 
         result = []
-        print "parseMain"       
         item["shop_template"] = "Main"
-        
-#         if response.body.find("地图坐标")!=-1:
-#             self.fw.write(response.url +" 地图坐标------------------------------")
-#             self.fw.flush()
-#         
-#         if response.body.find("门店介绍")!=-1:
-#             self.fw.write(response.url +" 门店介绍------------------------------")
-#             self.fw.flush()
         
         try:  
             breadcrumb = select.xpath(".//div[@class='breadcrumb']/b/a/span/text()").extract()
@@ -217,11 +204,10 @@ class SpiderTmallShop(Spider):
         photoUrl = response.url + "/photos"
         request = Request(photoUrl, callback=self.parseMainPhotos, priority=1234567)
         request.meta["item"] = copy.deepcopy(item)
+        
         # return request
         result.append(request)
         
-        
-
         # 评价，需要返回list，在上层，使用for yield
         rateList = select.xpath(".//ul[@id='reviewCommentId']/li")
         for li in rateList:
@@ -247,6 +233,7 @@ class SpiderTmallShop(Spider):
             pass
         
         return result
+    
     #===========================================================================
     # parseMainPhotos
     # return [item, request]
@@ -273,7 +260,8 @@ class SpiderTmallShop(Spider):
     #===========================================================================
     def parseMainBody(self, select, response, item):
         self.fw.write(response.url + "\tparseMainBody\n")
-#         self.fw.flush()
+        self.fw.flush()
+        
         result = []
         item["shop_template"] = "MainBody"
         print "parseMainBody"
@@ -375,8 +363,6 @@ class SpiderTmallShop(Spider):
             print e
 
         
-#         self.fw.write(response.url + "\tparseMain\n")
-#         self.fw.flush()
         # shop info
         try:
             addressPrefix = select.xpath(".//span[@itemprop='locality region']/text()").extract()[0].strip()
@@ -406,6 +392,7 @@ class SpiderTmallShop(Spider):
                     item["shop_open_time"] = li.xpath(".//span/text()")[1].extract().strip()
                 elif html.find("公交") != -1:
                     self.fw.write("body bus line info---------")
+                    self.fw.flush()
 #                     item["shop_bus_line"] = li.xpath(".//dd/span/text()").extract()[0]
                 elif html.find("商户简介") != -1:
                     item["shop_description"] = li.xpath(".//text()").extract()[2].strip()
@@ -473,6 +460,7 @@ class SpiderTmallShop(Spider):
         print "parseBreadcrumb_wrapper"
         
         self.fw.write(response.url + " MainBodyBreadcrumb-wrapper\n")
+        self.fw.flush()
 #         self.fw.flush()
 
         result = []
