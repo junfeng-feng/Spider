@@ -1,13 +1,7 @@
 # -*- coding: utf-8 -*-
-from scrapy import log
 import scrapy
 import MySQLdb.cursors
 from twisted.enterprise import adbapi
-
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 class InsertTmallPipe(object):
     def __init__(self, dbargs):
@@ -35,8 +29,8 @@ class InsertTmallPipe(object):
         return cls(dbargs)
         
     def process_item(self, item, spider):
-        self.dbpool.runInteraction(self.updateTmallSql, item)
-#         self.dbpool.runInteraction(self.insertTmallSql, item)
+#         self.dbpool.runInteraction(self.updateTmallSql, item)
+        self.dbpool.runInteraction(self.insertTmallSql, item)
         return item
     
     #===========================================================================
@@ -59,6 +53,7 @@ class InsertTmallPipe(object):
                 except Exception,e:
                     print e
         pass
+    
     def insertTmallSql(self, tx, item):
         insertProSql = """INSERT INTO `tmall_category_pro` 
             (`category_id`, `pro_id`, `pro_name`, `pro_value`) VALUES

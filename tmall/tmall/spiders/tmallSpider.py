@@ -52,7 +52,12 @@ class SpiderTmall(CrawlSpider):
         select = Selector(response)
         
         item = TmallCategoryItem()
-        item["related_product_num"] = select.css(".j_ResultsNumber").xpath("./span/text()")[0].extract()
+        item["related_product_num"] = ""
+        try:
+            item["related_product_num"] = select.css(".j_ResultsNumber").xpath("./span/text()")[0].extract()
+        except Exception,e:
+            print e
+            
         item["category_id"] = self.getCatId(response.url)
         
         catSel = select.xpath("//li[@data-tag='cat']")
@@ -63,15 +68,19 @@ class SpiderTmall(CrawlSpider):
         item["category_level2"] = ""
         item["category_level3"] = ""
         
+        item["category_name"] = ""
         # 通过li获取所有级分类名称，最后一级是本身，最底层的分级 category_name
         for index in xrange(category_level):
-            catName = catSel[index].xpath(".//a/text()")[0].extract()  # 取得li/a里面的text
-            if index == category_level - 1:
-                item["category_name"] = catName
-            else:
-                item["category_level%s" % (index + 1)] = catName
-            pass
-        
+            try:
+                catName = catSel[index].xpath(".//a/text()")[0].extract()  # 取得li/a里面的text
+                if index == category_level - 1:
+                    item["category_name"] = catName
+                else:
+                    item["category_level%s" % (index + 1)] = catName
+                pass
+            except Exception,e:
+                print e
+                
         # 分类对应的属性
         item["category_pro"] = {}
         proList = select.css(".propAttrs").css(".j_Prop")
@@ -86,6 +95,7 @@ class SpiderTmall(CrawlSpider):
                 pass
             item["category_pro"][attrKey] = valueList
             pass
+        
         item["flag"] = "category"
         # 生成分类的item
         yield item
@@ -95,7 +105,6 @@ class SpiderTmall(CrawlSpider):
         request = Request(brandUrl, callback=self.brandJsonCallBack, priority=123456)
         request.meta["category_id"] = item["category_id"]
         yield request
-        
         
         # 获取子集分类id，调用callback自身
         catUrl = "https://list.tmall.com/search_product.htm?cat=%s" 
@@ -108,7 +117,7 @@ class SpiderTmall(CrawlSpider):
                 catid = catidstr[self.catPrefixLen:]
                 print catid
                 requestUrl = catUrl % (catid)
-                request = Request(requestUrl, callback=self.parse, priority=12345678)
+                request = Request(requestUrl, callback=self.parse, priority=1234567)
                 yield request
             pass
         pass
@@ -146,6 +155,7 @@ class SpiderTmall(CrawlSpider):
         
         item["image_urls"] = image_urls
         item["flag"] = "brand"
+        
         item["category_pro"] = {}
         item["category_pro"]["品牌"] = brandList
         

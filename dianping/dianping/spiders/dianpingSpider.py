@@ -36,7 +36,7 @@ class SpiderTmallShop(Spider):
 
     #TODO 最大翻页数量也要做修改
     # 1~2506都是cityCode        
-    for id in xrange(1, 500):
+    for id in xrange(1, 2):
         start_urls.append("http://www.dianping.com/search/category/%s/90/g90p1" % id)
         
     def __init__(self):
@@ -49,7 +49,6 @@ class SpiderTmallShop(Spider):
         select = Selector(response)
         if not "shopDetail" in response.meta:
             # 店铺列表页
-            item = DianpingItem()
             allNo = self.questionIdPatten.findall(response.url)
             cityId = allNo[0]  # cityid
             pageNumber = allNo[-1]
@@ -58,6 +57,7 @@ class SpiderTmallShop(Spider):
             self.fw.write("%s cityId:%s, pageNumber：%s\n" % (response.url, cityId, pageNumber))
             self.fw.flush()
             
+            item = DianpingItem()
             item["city_id"] = cityId
             try:
                 cityName = select.css(".city").xpath("./text()").extract()[0]
@@ -90,12 +90,8 @@ class SpiderTmallShop(Spider):
                 request.meta["shopDetail"] = copy.deepcopy(item)
                 yield request
                 
-#                 yieldPageFlag = False
-#                 break  # for test
                 pass
             
-            #for test 不翻页
-#             yieldPageFlag = False
             if yieldPageFlag:
                 # 如果当前页有数据，则继续请求下一页
                 nextPageNumber = int(pageNumber) + 1
@@ -579,12 +575,6 @@ class SpiderTmallShop(Spider):
                 print e
             pass
         return result +rateResult
-    
-#         photoUrl = response.url + "/photos"
-#         print photoUrl
-#         request = Request(photoUrl, callback=self.parseMainPhotos, priority=123)
-#         request.meta["item"] = copy.deepcopy(item)
-#         return request
         pass    
 
     
