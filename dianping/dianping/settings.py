@@ -2,12 +2,6 @@
 
 # Scrapy settings for dianping project
 #
-# For simplicity, this file contains only settings considered important or
-# commonly used. You can find more settings consulting the documentation:
-#
-#     http://doc.scrapy.org/en/latest/topics/settings.html
-#     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
 BOT_NAME = 'dianping'
 
@@ -27,7 +21,11 @@ MYSQL_PASSWD = 'root'
 MYSQL_PORT = 3306
 
 #delay
-DOWNLOAD_DELAY = 1
+DOWNLOAD_DELAY = 2
+COOKIES_ENABLES=False
+
+
+HTTP_PROXY = 'http://127.0.0.1:8123'
 
 #images
 IMAGES_STORE = r'./img'
