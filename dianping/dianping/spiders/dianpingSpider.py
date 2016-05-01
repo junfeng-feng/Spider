@@ -28,17 +28,40 @@ class SpiderTmallShop(Spider):
     allowed_domain = ['dinaping.com']
     start_urls = [
 #                    "http://www.dianping.com/search/category/1/90/g90p50",
-                    "http://www.dianping.com/search/category/1/90/g90p430"
+#                     "http://www.dianping.com/search/category/1/90/g90p430"
                   ]
 
 #     for line in file("dianping/spiders/cityCode.list"):
 #         line  = line.strip().split("\n")
 #         cityCode = line[0]
-
+    maxPageDict = {}
+    try:
+        for line in file("pages.list"):
+            if line.find("pageNumber") == -1:
+                continue
+            line = line.replace("：", ":")
+            line = line.strip().split()
+            line = line[1:]
+    #         print line
+            cityNo = line[0].split(":")[1].strip(",")
+            maxPageNo = line[1].split(":")[1]
+            
+            if cityNo in maxPageDict and  int(maxPageDict[cityNo]) < int(maxPageNo):
+                maxPageDict[cityNo] = maxPageNo
+            else:
+                maxPageDict[cityNo] = maxPageNo 
+    except Exception,e:
+        #没有最大页，默认从1开始
+        print e
+        
     #TODO 最大翻页数量也要做修改
     # 1~2506都是cityCode        
     for id in xrange(2, 100):
-        start_urls.append("http://www.dianping.com/search/category/%s/90/g90p1" % id)
+        pageNo = 1
+        if str(id) in maxPageDict:
+            #取得最大的页面
+            pageNo = maxPageDict[str(id)]
+        start_urls.append("http://www.dianping.com/search/category/%s/90/g90p%s" % (id, pageNo))
         
     def __init__(self):
         self.questionIdPatten = re.compile("[0-9]+")
@@ -51,8 +74,8 @@ class SpiderTmallShop(Spider):
     def parse(self, response):
         #翻页请求，每10页，停30秒
         self.pageNo += 1
-        if self.pageNo % 10 == 0:
-            time.sleep(25)
+        if self.pageNo % 15 == 0:
+            time.sleep(20)
             
         select = Selector(response)
         if not "shopDetail" in response.meta:
@@ -62,7 +85,7 @@ class SpiderTmallShop(Spider):
             pageNumber = allNo[-1]
             
             #记录page
-            self.fw.write("%s cityId:%s, pageNumber：%s\n" % (response.url, cityId, pageNumber))
+            self.fw.write("%s cityId:%s, pageNumber:%s\n" % (response.url, cityId, pageNumber))
             self.fw.flush()
             
             item = DianpingItem()
@@ -639,6 +662,6 @@ class SpiderTmallShop(Spider):
         
 #         rateItem["rate_id"] = str(uuid.uuid1())
         rateItem["image_urls"] = []  # 图片
-        rateItem["rata_img"] = ""
         rateItem["shop_flag"] = "no"
         return rateItem
+
