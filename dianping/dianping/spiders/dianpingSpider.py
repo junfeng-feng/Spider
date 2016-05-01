@@ -28,7 +28,7 @@ class SpiderTmallShop(Spider):
     allowed_domain = ['dinaping.com']
     start_urls = [
 #                    "http://www.dianping.com/search/category/1/90/g90p50",
-                    "http://www.dianping.com/search/category/1/90/g90p362"
+                    "http://www.dianping.com/search/category/1/90/g90p430"
                   ]
 
 #     for line in file("dianping/spiders/cityCode.list"):
@@ -37,8 +37,8 @@ class SpiderTmallShop(Spider):
 
     #TODO 最大翻页数量也要做修改
     # 1~2506都是cityCode        
-#     for id in xrange(2, 5):
-#         start_urls.append("http://www.dianping.com/search/category/%s/90/g90p1" % id)
+    for id in xrange(2, 100):
+        start_urls.append("http://www.dianping.com/search/category/%s/90/g90p1" % id)
         
     def __init__(self):
         self.questionIdPatten = re.compile("[0-9]+")
@@ -52,7 +52,7 @@ class SpiderTmallShop(Spider):
         #翻页请求，每10页，停30秒
         self.pageNo += 1
         if self.pageNo % 10 == 0:
-            time.sleep(30)
+            time.sleep(25)
             
         select = Selector(response)
         if not "shopDetail" in response.meta:
@@ -639,5 +639,6 @@ class SpiderTmallShop(Spider):
         
 #         rateItem["rate_id"] = str(uuid.uuid1())
         rateItem["image_urls"] = []  # 图片
+        rateItem["rata_img"] = ""
         rateItem["shop_flag"] = "no"
         return rateItem
