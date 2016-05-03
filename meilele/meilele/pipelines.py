@@ -42,7 +42,10 @@ class MeilelePipeline(object):
     def insertTmallShopSql(self, tx, item):
 
         if item["is_question"] == "yes":
-            image_src = ""
+            if len(item["images"]) > 0:
+                image_src = ",".join(["ask/meilele" + img["path"][4:] for img in item["images"]])
+            else:
+                image_src=""
             try:
                 tx.execute(self.insertQuestionSql,
                        (item["question_id"],
@@ -55,7 +58,10 @@ class MeilelePipeline(object):
                 print e
             pass
         else:
-            image_src = ""
+            if len(item["images"]) > 0:
+                image_src = ",".join(["ask/meilele" + img["path"][4:] for img in item["images"]])
+            else:
+                image_src=""
             try:
                 tx.execute(self.insertAnswerSql,
                        (

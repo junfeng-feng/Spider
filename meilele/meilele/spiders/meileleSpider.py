@@ -26,13 +26,14 @@ class SpiderTmallShop(Spider):
     
     allowed_domain = ['meilele.com']
     start_urls = [
+                  "http://zx.meilele.com/ask/10092.html",
 #                 "http://zx.meilele.com/ask/15097.html",
 #                 "http://zx.meilele.com/ask/35547.html",
 #                 "http://zx.meilele.com/ask/290.html",
                   ]
 
-    for id in xrange(35610, 100000):
-        start_urls.append("http://zx.meilele.com/ask/%s.html" % id)
+#     for id in xrange(1, 100000):
+#         start_urls.append("http://zx.meilele.com/ask/%s.html" % id)
         
     def __init__(self):
         self.digitalPattern = re.compile("[0-9]+")
@@ -78,7 +79,7 @@ class SpiderTmallShop(Spider):
             
             item["question_title"] = "".join(select.css(".ask_de_con").xpath(".//div")[1].xpath(".//text()").extract()).strip()
             try:
-                item["question_description"] = select.css(".descre").xpath(".//p")[2].extract()[4:-4]
+                item["question_description"] = "".join(select.css(".descre").xpath(".//p/text()").extract())
             except Exception, e:
                 item["question_description"] = ""
                 print e
@@ -91,6 +92,14 @@ class SpiderTmallShop(Spider):
                 print e
            
             item["question_category"] = big_category
+            
+            item["image_urls"] = []
+            try:
+                # 问题的图片，如果是list
+                item["image_urls"] = select.xpath(".//div[@class='descre']").xpath(".//p[@class='img']/a/@href").extract()
+            except Exception, e:
+                pass
+                
             item["is_question"] = "yes"
             yield item
             
@@ -99,16 +108,24 @@ class SpiderTmallShop(Spider):
             # other answer
             ask_answer_li_list = json.loads(response.body, encoding="utf-8")["result"]
             
+            allNo = self.digitalPattern.findall(response.url)
+            pageNo = allNo[0]
+            askId = allNo[1]
+            index = 0
             for li in ask_answer_li_list:
+                index += 1
                 item = MeileleItem()
                 item["question_id"] = response.meta["question_id"]
-                item["answer_id"] = str(uuid.uuid1()) + "-" + li["ask_id"]
+                item["answer_id"] = askId + "-" + pageNo + "-" + str(index)
                 
                 item["answer_content"] = li["ask_content"]
                 if li["ask_best"] == "1":
                     item["is_best"] = "yes"
                 else:
                     item["is_best"] = "no"
+                
+                if li["ask_image"] != False:
+                    item["image_urls"] = [li["ask_image"]]
                 
                 item["is_question"] = "no"
                 yield item

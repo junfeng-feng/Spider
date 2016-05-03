@@ -26,9 +26,10 @@ class SpiderTmallShop(Spider):
     
     allowed_domain = ['to8to.com']
     start_urls = [
-                  "http://www.to8to.com/ask/k42622.html",
-                "http://www.to8to.com/ask/k2193132.html",
-                "http://www.to8to.com/ask/k866853.html",
+#                   "http://www.to8to.com/ask/k2003794.html",
+#                   "http://www.to8to.com/ask/k42622.html",
+#                 "http://www.to8to.com/ask/k2193132.html",
+#                 "http://www.to8to.com/ask/k866853.html",
                   ]
 
     for id in xrange(0, 3000000):
@@ -112,27 +113,30 @@ class SpiderTmallShop(Spider):
         best_answer_flag = False
         try:        
             # 有的问题没有答案，所以使用try
-            
-            # best
-            item["answer_id"] = str(uuid.uuid1())
-            item["answer_content"] = select.css(".best_answer").xpath("./p").extract()[0][21:-4]
-            item["is_best"] = "yes"
-            # 如果最佳答案有图片
             try:
-                image_url = "http://www.to8to.com" + select.css(".best_answer").xpath(".//img/@src")[0].extract()
-                item["image_urls"].append(image_url)
-                
-                item["imageStatus"][item["answer_id"]] = image_url
+                # best
+                item["answer_id"] = str(uuid.uuid1())
+                item["answer_content"] = select.css(".best_answer").xpath("./p").extract()[0][21:-4]
+                item["is_best"] = "yes"
+                # 如果最佳答案有图片
+                try:
+                    image_url = "http://www.to8to.com" + select.css(".best_answer").xpath(".//img/@src")[0].extract()
+                    item["image_urls"].append(image_url)
+                    
+                    item["imageStatus"][item["answer_id"]] = image_url
+                except Exception, e:
+                    print e
+                    
+                best_answer_flag = True
+                if not isNextPage == "true":#如果是翻页请求，则不保存最佳答案
+                    #是第一页，则保存最佳答案
+                    item["is_question"] = "no"
+                    item["image_urls"] = []
+                    yield item
+                    item = copy.deepcopy(item)
             except Exception, e:
                 print e
-            best_answer_flag = True
-            if not isNextPage == "true":#如果是翻页请求，则不保存最佳答案
-                #是第一页，则保存最佳答案
-                item["is_question"] = "no"
-                item["image_urls"] = []
-                yield item
-                item = copy.deepcopy(item)
-            
+                           
             # other answer
             ask_answer_li_list = select.css(".ask_answer_li")
             if best_answer_flag:
@@ -157,7 +161,6 @@ class SpiderTmallShop(Spider):
                 item["image_urls"] = []
                 yield item
                 item = copy.deepcopy(item)
-                
                 pass
         except Exception, e:
             print e
