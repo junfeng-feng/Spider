@@ -60,10 +60,7 @@ ITEM_PIPELINES = {
     'tmallproductid.pipelines.TmallproductidPipeline': 300,
 }
 
-#增大并发item, request, perdomain
-CONCURRENT_ITEMS = 256
-CONCURRENT_REQUESTS = 16
-CONCURRENT_REQUESTS_PER_DOMAIN = 16
+DOWNLOAD_DELAY = 0.1
 
 #start dbconfig
 MYSQL_HOST = '127.0.0.1'

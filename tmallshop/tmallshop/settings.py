@@ -29,6 +29,6 @@ MYSQL_PORT = 3306
 DOWNLOAD_DELAY = 0.1
 
 #images
-IMAGES_STORE = r'D:\ProgramingIDE\workspace\SuperSpider\tmallshop\img'
+IMAGES_STORE = r'./img'
 IMAGES_EXPIRES = 90
 COOKIES_ENABLES=False

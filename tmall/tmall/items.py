@@ -12,6 +12,7 @@ from scrapy import Field, Item
 class TmallCategoryItem(Item):
     
     flag = Field()
+    is_decoration = Field()
     #category
     category_id = Field()
     category_name = Field()

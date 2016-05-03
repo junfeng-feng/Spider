@@ -10,7 +10,7 @@ import scrapy
 
 class TmallproductidItem(scrapy.Item):
     # define the fields for your item here like:
+    category_id = scrapy.Field()
     brand_id = scrapy.Field()
     product_id = scrapy.Field()
-    product_price = scrapy.Field()
     pass

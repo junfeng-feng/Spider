@@ -7,6 +7,15 @@ from twisted.enterprise import adbapi
 class TmallproductidPipeline(object):
     def __init__(self, dbargs):
         self.dbargs = dbargs
+        self.insertProductIdSql = r"""INSERT INTO `tmall_product_id` (
+`brand_id` ,
+`product_id` ,
+`category_id`
+)
+VALUES (
+%s, %s, %s
+);
+"""
     
     def open_spider(self, spider):
         self.dbpool = adbapi.ConnectionPool('MySQLdb', **(self.dbargs))
@@ -34,20 +43,11 @@ class TmallproductidPipeline(object):
         return item
     
     def insertTmallSql(self, tx, item):
-        insertProductIdSql = r"""INSERT INTO `tmall_product_id_list` (
-`brand_id` ,
-`product_id` ,
-`product_price`
-)
-VALUES (
-%s, %s, %s
-);
-"""
         try:
-            tx.execute(insertProductIdSql, 
+            tx.execute(self.insertProductIdSql, 
                                 (item['brand_id'], #实际是brand_id
                                   item['product_id'],
-                                  item["product_price"],
+                                  item["category_id"],
                                   ))
         except Exception, e:
             logging.error(str(e))

@@ -1,0 +1,20 @@
+
+#第二版
+
+CREATE TABLE `tmall_product_id` (
+  `product_id` varchar(64) NOT NULL,
+  `category_id` varchar(64) NOT NULL,
+  `brand_id` varchar(64) NOT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='天猫产品ID，包含分类';
+
+
+
+
+#第一版根据品牌获取的表结构
+CREATE TABLE `tmall_product_id_list` (
+  `content` varchar(256) NOT NULL COMMENT '对应品牌id，做参考',
+  `product_id` varchar(64) NOT NULL COMMENT '产品id',
+  `product_price` varchar(64) NOT NULL COMMENT '产品价格，仅做参考价格',
+  PRIMARY KEY (`product_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;

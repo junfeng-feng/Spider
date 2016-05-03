@@ -56,12 +56,14 @@ class InsertTmallPipe(object):
     
     def insertTmallSql(self, tx, item):
         insertProSql = """INSERT INTO `tmall_category_pro` 
-            (`category_id`, `pro_id`, `pro_name`, `pro_value`) VALUES
-                (%s, %s, %s, %s)"""
+            (`category_id`, `pro_id`, `pro_name`, `pro_value`, `is_decoration`) VALUES
+                (%s, %s, %s, %s, %s)"""
                         
         if item["flag"] == "category":
-            insertCatSql = r"""INSERT INTO `tmall_category` (`category_id`, `category_name`, `category_level`, `category_level1`, `category_level2`, `category_level3`,`related_product_num`) VALUES
-                (%s, %s, %s, %s, %s, %s, %s)"""
+            insertCatSql = r"""INSERT INTO `tmall_category` 
+            (`category_id`, `category_name`, `category_level`, `category_level1`, `category_level2`, `category_level3`,
+            `related_product_num`, `is_decoration`) VALUES
+                (%s, %s, %s, %s, %s, %s, %s, %s)"""
             
             try:
                 tx.execute(insertCatSql, (item["category_id"], 
@@ -70,7 +72,8 @@ class InsertTmallPipe(object):
                                       item["category_level1"].replace("'", ""), 
                                       item["category_level2"].replace("'", ""), 
                                       item["category_level3"].replace("'", ""),
-                                      item["related_product_num"]
+                                      item["related_product_num"],
+                                      item["is_decoration"],
                                       ))
             except Exception,e:
                 print e
@@ -87,7 +90,8 @@ class InsertTmallPipe(object):
                         tx.execute(insertProSql, (item["category_id"], 
                                               pro_id,
                                               pro_name,
-                                              pro_value 
+                                              pro_value,
+                                              item["is_decoration"],
                                               ))
                     except Exception,e:
                         print e                        
@@ -96,19 +100,25 @@ class InsertTmallPipe(object):
         elif item["flag"] == "brand":
             #===================================================================
             # TODO
-            # 需要，将品牌信息和category关联起来
+            # 需要,将品牌信息和category关联起来
             #===================================================================
             brandList = item["category_pro"]["品牌"]
-            insertBrandSql = r"""INSERT INTO `tmall_brand` (`brand_id`, `brand_en`, `brand_zh`, `brand_logo`) VALUES (%s, %s, %s, %s)"""
-            for index, brandItem in zip(xrange(len(brandList)), brandList):
-                brand_logo = item["images"][index]["path"] #uuid
-                brand_logo = brand_logo.replace("full/", "brand/tm/")
+            insertBrandSql = r"""INSERT INTO `tmall_brand` (`brand_id`, `brand_en`, `brand_zh`, `brand_logo`, `is_decoration`) VALUES (%s, %s, %s, %s, %s)"""
+            for brandItem in brandList:
+                brand_logo = ""
+                #如果有logo,取logo
+                if "brand_logo_url" in brandItem:
+                    for image in item["images"]:
+                        if brandItem["brand_logo_url"] == image["url"]:
+                            brand_logo ="brand/tm"+ image["path"][4:] #uuid
+                            break
                 
                 try:
                     tx.execute(insertBrandSql, (brandItem["brand_id"],
                                             brandItem["brand_en"],
                                             brandItem["brand_zh"], 
-                                            brand_logo))
+                                            brand_logo,
+                                            item["is_decoration"]))
                 except Exception,e:
                     print e   
                     
@@ -116,7 +126,8 @@ class InsertTmallPipe(object):
                     tx.execute(insertProSql, (item["category_id"], 
                                               brandItem["brand_id"],
                                               "品牌",
-                                              brandItem["brand_zh"] 
+                                              brandItem["brand_zh"],
+                                              item["is_decoration"]
                                               ))    
                 except Exception,e:
                     print e

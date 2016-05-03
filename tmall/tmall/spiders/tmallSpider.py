@@ -13,6 +13,12 @@ import chardet
 
 from tmall.items import TmallCategoryItem
 
+logging.basicConfig(level=logging.INFO,
+                format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                datefmt='%a, %d %b %Y %H:%M:%S',
+                filename='tmall.log',
+                filemode='a')
+
 #===============================================================================
 # SpiderTmall
 # 根据给定的一级分类，抓取对应的子分类和所有品牌
@@ -23,43 +29,61 @@ class SpiderTmall(CrawlSpider):
     allowed_domain = ['tmall.com']
     start_urls = []
     
-    # read cat id list from file
-    # 50000000~50221126的所有有效的分类id
-    # #只需要第一次跑一遍，之后，就不用再重复抓取
-#     catIdList = eval(file("tmall/spiders/catid.txt").read()) 
-#     for catid in catIdList:
-#         start_urls.append("https://list.tmall.com/search_product.htm?cat=%s" % (catid))
-
-    # 50000000~50221126 done
-    # 54402802~ 54500000 done
-    # 55000000~55311317 done
-#     for catid in xrange(55311317, 56000000):
-#         start_urls.append("https://list.tmall.com/search_product.htm?cat=%s" % (catid))
-            
+    #一级分类ID list
     for catid in file("./tmall/spiders/catid.list"):
-        catid = catid.strip()
+        catid = catid.strip().split()[0]
         start_urls.append("https://list.tmall.com/search_product.htm?cat=%s" % (catid))
 
     def __init__(self):
         logging.info("spider init")
+        
         self.catPattern = re.compile(r"cat=[0-9]+")  # cat re
         self.catPrefixLen = len("cat=")
         self.brandPattern = re.compile(r"brand=[0-9]+")  # brandPattern re
         self.brandPrefixLen = len("brand=")
+        
+        self.catidIsDecrationSet = set([catid.strip().split()[0] 
+                                            for catid in file("./tmall/spiders/catid.list")
+                                                if catid.strip().split()[1] == "is_decoration"])
         pass
     
     def parse(self, response):
         select = Selector(response)
-        
         item = TmallCategoryItem()
-        item["related_product_num"] = ""
-        try:
-            item["related_product_num"] = select.css(".j_ResultsNumber").xpath("./span/text()")[0].extract()
-        except Exception,e:
-            print e
-            
+        
         item["category_id"] = self.getCatId(response.url)
         
+        if "is_decoration" in response.meta:
+            #子分类，带过来是否为装修类
+            item["is_decoration"] = response.meta["is_decoration"]
+        else:
+            #一级分类，直接标示是否为装修类
+            if item["category_id"] in self.catidIsDecrationSet:
+                item["is_decoration"] = "yes"
+            else:
+                item["is_decoration"] = "no"
+    
+        # 获取子集分类id，调用callback自身
+        catUrl = "https://list.tmall.com/search_product.htm?cat=%s" 
+        #如果有子分类,地柜查找子分类
+        cateAttrs = select.css(".cateAttrs")
+        if len(cateAttrs) > 0:
+            catIdList = self.catPattern.findall(cateAttrs.extract()[0])
+            for catidstr in catIdList:
+                catid = catidstr[self.catPrefixLen:]
+                print catid
+                requestUrl = catUrl % (catid)
+                request = Request(requestUrl, callback=self.parse, priority=1234567)
+                request.meta["is_decoration"] = item["is_decoration"]
+                yield request
+            pass
+
+        item["related_product_num"] = ""
+        try:
+            item["related_product_num"] = select.css(".j_ResultsNumber").xpath("./span/text()")[0].extract().strip()
+        except Exception,e:
+            print e
+
         catSel = select.xpath("//li[@data-tag='cat']")
         category_level = len(catSel)
         # 级别
@@ -85,15 +109,17 @@ class SpiderTmall(CrawlSpider):
         item["category_pro"] = {}
         proList = select.css(".propAttrs").css(".j_Prop")
         for pro in proList:
-            attrKey = pro.xpath(".//div[@class='attrKey']/text()")[0]
-            
-            attrKey = attrKey.extract().strip()
-            liList = pro.xpath("./div[@class='attrValues']//li/a/text()")
-            valueList = []
-            for value in liList:
-                valueList.append(value.extract().strip())
-                pass
-            item["category_pro"][attrKey] = valueList
+            try:
+                attrKey = pro.xpath(".//div[@class='attrKey']/text()")[0]
+                attrKey = attrKey.extract().strip()
+                liList = pro.xpath("./div[@class='attrValues']//li/a/text()")
+                valueList = []
+                for value in liList:
+                    valueList.append(value.extract().strip())
+                    pass
+                item["category_pro"][attrKey] = valueList
+            except Exception,e:
+                print e
             pass
         
         item["flag"] = "category"
@@ -102,28 +128,17 @@ class SpiderTmall(CrawlSpider):
     
         # 请求品牌更多的连接
         brandUrl = "https://list.tmall.com/ajax/allBrandShowForGaiBan.htm?cat=%s" % (item["category_id"])
-        request = Request(brandUrl, callback=self.brandJsonCallBack, priority=123456)
+        request = Request(brandUrl, callback=self.brandJsonCallBack, priority=1234567)
         request.meta["category_id"] = item["category_id"]
+        request.meta["is_decoration"] = item["is_decoration"]
+        
         yield request
-        
-        # 获取子集分类id，调用callback自身
-        catUrl = "https://list.tmall.com/search_product.htm?cat=%s" 
-        
-        #如果有子分类
-        cateAttrs = select.css(".cateAttrs")
-        if len(cateAttrs) > 0:
-            catIdList = self.catPattern.findall(cateAttrs.extract()[0])
-            for catidstr in catIdList:
-                catid = catidstr[self.catPrefixLen:]
-                print catid
-                requestUrl = catUrl % (catid)
-                request = Request(requestUrl, callback=self.parse, priority=1234567)
-                yield request
-            pass
         pass
     
     def brandJsonCallBack(self, response):
         item = TmallCategoryItem()
+        item["is_decoration"] =  response.meta["is_decoration"]
+        
         category_id = response.meta["category_id"]
         respList = json.loads(response.body.decode("GBK").encode("utf-8"))
         
@@ -141,15 +156,20 @@ class SpiderTmall(CrawlSpider):
             brand_en = title[0]
             brand_zh = title[1]
             
-            # 没有img则跳过此品牌
-            if len(dictItem["img"]) == 0:
-                continue
-            
-            img_url = "http://img.alicdn.com/bao/uploaded/" + dictItem["img"]
-            
-            image_urls.append(img_url)
-            
+            #太多没有图片的，没有保存，被跳过
+#             # 没有img则跳过此品牌
+#             if len(dictItem["img"]) == 0:
+#                 #问题在这里，没有图片，直接跳过
+#                 continue
+#                 pass
+
             brand = {"brand_id":brand_id, "brand_en":brand_en, "brand_zh":brand_zh}
+            if len(dictItem["img"]) > 0:
+                img_url = "http://img.alicdn.com/bao/uploaded/" + dictItem["img"]
+                
+                brand["brand_logo_url"] = img_url
+                image_urls.append(img_url)
+                
             brandList.append(brand)
             pass
         
