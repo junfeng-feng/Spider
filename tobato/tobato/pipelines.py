@@ -43,12 +43,8 @@ class TobatoPipeline(object):
 
         if item["is_question"] == "yes":
             image_src = ""
-            if item["question_id"] in item["imageStatus"] and not item["question_description"].startswith("<img"):
-                for image in item["images"]:
-                    if image["url"] == item["imageStatus"][item["question_id"]]:
-                        image_src = "/ask/t" + image["path"][4:]
-                        break
-
+            if len(item["images"]) and not item["question_description"].startswith("<img"):
+                image_src = ",".join(["/ask/t" + image["path"][4:] for image in item["images"]])
             try:
                 tx.execute(self.insertQuestionSql,
                        (item["question_id"],
@@ -62,12 +58,8 @@ class TobatoPipeline(object):
             pass
         else:
             image_src = ""
-            if item["answer_id"] in item["imageStatus"]:
-                for image in item["images"]:
-                    if image["url"] == item["imageStatus"][item["answer_id"]]:
-                        image_src = "/ask/t" + image["path"][4:]
-                        break
-            
+            if len(item["images"])>0:
+                image_src = ",".join(["/ask/t" + img["path"][4:] for img in item["images"]])
             try:
                 tx.execute(self.insertAnswerSql,
                        (

@@ -18,7 +18,7 @@ from meilele.items import MeileleItem
 logging.basicConfig(level=logging.INFO,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
-                filename='tobato.log',
+                filename='meilele.log',
                 filemode='a')
 
 class SpiderTmallShop(Spider):
@@ -26,14 +26,14 @@ class SpiderTmallShop(Spider):
     
     allowed_domain = ['meilele.com']
     start_urls = [
-                  "http://zx.meilele.com/ask/10092.html",
+#                   "http://zx.meilele.com/ask/10092.html",
 #                 "http://zx.meilele.com/ask/15097.html",
 #                 "http://zx.meilele.com/ask/35547.html",
 #                 "http://zx.meilele.com/ask/290.html",
                   ]
 
-#     for id in xrange(1, 100000):
-#         start_urls.append("http://zx.meilele.com/ask/%s.html" % id)
+    for id in xrange(1, 100000):
+        start_urls.append("http://zx.meilele.com/ask/%s.html" % id)
         
     def __init__(self):
         self.digitalPattern = re.compile("[0-9]+")
