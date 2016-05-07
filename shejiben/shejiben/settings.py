@@ -6,6 +6,7 @@ SPIDER_MODULES = ['shejiben.spiders']
 NEWSPIDER_MODULE = 'shejiben.spiders'
 
 ITEM_PIPELINES = {
+    'scrapy.pipelines.images.ImagesPipeline': 1,
     'shejiben.pipelines.ShejibenPipeline': 300,
 }
 
@@ -18,7 +19,7 @@ MYSQL_PASSWD = 'root'
 MYSQL_PORT = 3306
 
 #delay
-DOWNLOAD_DELAY = 1
+# DOWNLOAD_DELAY = 0.01
 COOKIES_ENABLES=False
 
 
