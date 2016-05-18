@@ -1,0 +1,18 @@
+CREATE TABLE `tobato_baike_title` (
+  `title_id` varchar(64) NOT NULL COMMENT '百科id',
+  `title_name` varchar(64) DEFAULT NULL COMMENT '百科标题',
+  `title_introduction` text COMMENT '简介',
+  `title_category` varchar(128) DEFAULT NULL COMMENT '分类',
+  `content_uuid_list` varchar(1024) DEFAULT NULL COMMENT '目录id列表',
+  `title_url` varchar(128) DEFAULT NULL COMMENT 'url抓取地址',
+  PRIMARY KEY (`title_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `tobato_baike_content` (
+  `content_uuid` char(64) NOT NULL COMMENT '百科目录id',
+  `content_name` varchar(64) DEFAULT NULL COMMENT '目录名称',
+  `content_text` text COMMENT '目录内容',
+  `img_address` text COMMENT '对应图片地址',
+  `title_id` varchar(64) NOT NULL COMMENT '所属百科id',
+  PRIMARY KEY (`content_uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
