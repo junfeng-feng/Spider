@@ -1,0 +1,47 @@
+CREATE TABLE `tobosu_designer` (
+  `designer_id` varchar(128) NOT NULL,
+  `company_id` varchar(128) NOT NULL,
+  `designer_name` varchar(128) DEFAULT NULL,
+  `position` varchar(128) DEFAULT NULL,
+  `good_at_filed` text,
+  `good_at_style` text,
+  `designer_introduction` text,
+  `head_img` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`designer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `tobosu_company` (
+  `company_id` varchar(128) NOT NULL,
+  `company_name` varchar(128) DEFAULT NULL,
+  `company_shortname` varchar(128) DEFAULT NULL,
+  `company_koubei` varchar(64) DEFAULT NULL,
+  `service_zone` text,
+  `price` text,
+  `service_content` text,
+  `decoration_type_jia` text,
+  `decoration_type_gong` text,
+  `decoration_style` text,
+  `city` text,
+  `address` text,
+  `company_des` text,
+  `logo` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `tobosu_anli` (
+  `anli_id` varchar(64) NOT NULL,
+  `company_id` varchar(64) NOT NULL,
+  `designer_id` varchar(64) NOT NULL,
+  `img_type` varchar(64) DEFAULT NULL,
+  `anli_name` varchar(64) DEFAULT NULL,
+  `anli_huxing` varchar(64) DEFAULT NULL,
+  `area` varchar(64) DEFAULT NULL,
+  `fee` varchar(64) DEFAULT NULL,
+  `style` varchar(64) DEFAULT NULL,
+  `img_des` text,
+  `img` text,
+  `xiaoqu` varchar(64) DEFAULT NULL,
+  PRIMARY KEY (`anli_id`),
+  KEY `company_id` (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
