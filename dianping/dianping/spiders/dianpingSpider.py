@@ -75,7 +75,7 @@ class SpiderTmallShop(Spider):
     def parse(self, response):
         #翻页请求，每10页，停30秒
         self.pageNo += 1
-        if self.pageNo % 4 == 0:
+        if self.pageNo % 2 == 0:
             time.sleep(25)
             
         select = Selector(response)

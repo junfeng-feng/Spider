@@ -28,18 +28,17 @@ class SpiderTmallShop(Spider):
     
     allowed_domain = ['shiejiben.com']
     start_urls = [
-#                   "http://www.shejiben.com/sjs/5415229/",
+                "http://www.shejiben.com/sjs/5415229/",
 #                     "http://www.shejiben.com/sjs/1466490/",
                   ]
         
-    for id in xrange(1466490, 1569490):
+    for id in file("shejiben/spiders/designerid.list"):
+        id = id.strip()
         start_urls.append("http://www.shejiben.com/sjs/%s/" % (id))
         
     def __init__(self):
         self.idPatten = re.compile("[0-9]+")
-        self.pageUrl = "http://www.dianping.com/search/category/%s/90/g90p%s"
         self.fw = file("pages.list", "a")
-        
         pass
     
     def parse(self, response):
