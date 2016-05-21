@@ -10,8 +10,26 @@ class ShejibenPipeline(object):
     def __init__(self, dbargs):
         self.dbargs = dbargs
         
-        self.insertQuestionSql = r"""INSERT INTO `shijieben` (`designer_id`, `designer_name`, `designer_phone_no`, `designer_email`, `designer_sex`, `designer_position`, `apartment`, `style`, `program`, `average_price`, `work_years`, `introduction`, `head_photo`, `category_id`, `category_name`, `company_id`, `company_name`) VALUES
-(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+        self.insertDesignerSql = r"""INSERT INTO `shejiben_designer` 
+        (`designer_id`, `designer_name`, `signature`, `consulting_number`, `view_number`, `designer_position`, `address`, `style`, `experience`, `fee`, `certification_rewords`, `introduction`, `head_photo`, `followers_number`, `renqi`, `follows`) 
+        VALUES 
+        (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+        self.insertDesignerRateSql = r"""INSERT INTO `shejiben_designer_rate` 
+        (`designer_id`, `rate_id`, `rate_content`, `rate_img`, `rate_addr`, `rate_datetime`) 
+        VALUES 
+        (%s, %s, %s, %s, %s, %s);"""
+        self.insertDesignerBlogSql = r"""INSERT INTO `shejiben_designer_blog`
+        (`designer_id`, `blog_id`, `blog_title`, `blog_datetime`, `view_number`, `blog_content`, `blog_img`, `blog_author`) 
+        VALUES
+         (%s, %s, %s, %s, %s, %s, %s, %s);"""
+        # 博客评论不抓
+#         self.insertDesignerBlogRateSql = r""""""
+        # 成交记录不需要抓取
+#         self.insertDesignerProgramSql = r"""INSERT INTO `shejiben_designer_program` 
+#         (`designer_id`, `program_id`, `program_name`, `deal_time`, `status`) 
+#         VALUES 
+#         (%s, %s, %s, %s, %s);"""
+        
     def open_spider(self, spider):
         self.dbpool = adbapi.ConnectionPool('MySQLdb', **(self.dbargs))
         
@@ -39,31 +57,56 @@ class ShejibenPipeline(object):
     
     def insertTmallShopSql(self, tx, item):
         
-        if len(item["images"]) > 0:
-            item["head_photo"] = "shejiben" + item["images"][0]["path"][4:]
+        if item["flag"] == "designer":
+            try:
+                if len(item["images"]) > 0:
+                    item["head_photo"] = "shejiben" + item["images"][0]["path"][4:]
+                else:
+                    item["head_photo"] = ""
+                tx.execute(self.insertDesignerSql,
+                       (
+                        item["designer_id"],
+                        item["designer_name"],
+                        item["signature"],
+                        item["consulting_number"],
+                        item["view_number"],
+                        item["designer_position"],
+                        item["address"],
+                        item["style"],
+                        item["experience"],
+                        item["fee"],
+                        item["certification_rewords"],
+                        item["introduction"],
+                        item["head_photo"],
+                        item["followers_number"],
+                        item["renqi"],
+                        item["follows"],
+                        ))
+            except Exception, e:
+                print e
+        elif item["flag"] == "rate":
+            try:
+                tx.execute(self.insertDesignerRateSql,
+                       (
+                        item["designer_id"],
+                        item["rate_id"],
+                        item["rate_content"],
+                        item["rate_img"],
+                        item["rate_addr"],
+                        item["rate_datetime"],
+                        ))
+            except Exception, e:
+                print e
         else:
-            item["head_photo"] = ""
-            
-        try:
-            tx.execute(self.insertQuestionSql,
-                   (
-                    item["designer_id"],
-                    item["designer_name"],
-                    item["designer_phone_no"],
-                    item["designer_email"],
-                    item["designer_sex"],
-                    item["designer_position"],
-                    item["apartment"],
-                    item["style"],
-                    item["program"],
-                    item["average_price"],
-                    item["work_years"],
-                    item["introduction"],
-                    item["head_photo"],
-                    item["category_id"],
-                    item["category_name"],
-                    item["company_id"],
-                    item["company_name"],
-                    ))
-        except Exception, e:
-            print e
+            try:
+                tx.execute(self.insertDesignerBlogSql,
+                       (
+                        item["designer_id"],
+                        item["rate_id"],
+                        item["rate_content"],
+                        item["rate_img"],
+                        item["rate_addr"],
+                        item["rate_datetime"],
+                        ))
+            except Exception, e:
+                print e

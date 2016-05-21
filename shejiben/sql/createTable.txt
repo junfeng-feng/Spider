@@ -1,20 +1,59 @@
-CREATE TABLE `shejiben` (
+CREATE TABLE `shejiben_designer` (
   `designer_id` varchar(64) NOT NULL,
   `designer_name` varchar(64) DEFAULT NULL,
-  `designer_phone_no` varchar(16) DEFAULT NULL,
-  `designer_email` varchar(64) DEFAULT NULL,
-  `designer_sex` varchar(4) DEFAULT NULL,
+  `signature` varchar(16) DEFAULT NULL COMMENT '签名',
+  `consulting_number` varchar(64) DEFAULT NULL COMMENT '预约咨询数量',
+  `view_number` varchar(4) DEFAULT NULL COMMENT '流量次数',
   `designer_position` varchar(64) DEFAULT NULL COMMENT '职位',
-  `apartment` varchar(64) DEFAULT NULL,
-  `style` varchar(64) DEFAULT NULL,
-  `program` varchar(64) DEFAULT NULL,
-  `average_price` varchar(16) DEFAULT NULL,
-  `work_years` varchar(16) DEFAULT NULL,
-  `introduction` text,
+  `address` varchar(64) DEFAULT NULL COMMENT '所在地',
+  `style` varchar(64) DEFAULT NULL COMMENT '擅长风格',
+  `experience` varchar(64) DEFAULT NULL COMMENT '设计经验',
+  `fee` varchar(16) DEFAULT NULL COMMENT '设计费用',
+  `certification_rewords` varchar(16) DEFAULT NULL,
+  `introduction` text COMMENT '个人简介',
   `head_photo` varchar(64) DEFAULT NULL,
-  `category_id` varchar(64) DEFAULT NULL,
-  `category_name` varchar(64) DEFAULT NULL,
-  `company_id` varchar(64) DEFAULT NULL,
-  `company_name` varchar(64) DEFAULT NULL,
+  `followers_number` varchar(64) DEFAULT NULL COMMENT '粉丝数量',
+  `renqi` varchar(64) DEFAULT NULL COMMENT '人气',
+  `follows` varchar(64) DEFAULT NULL COMMENT '关注',
   PRIMARY KEY (`designer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `shejiben_designer_rate` (
+  `designer_id` varchar(64) ,
+  `rate_id` varchar(64) ,
+  `rate_content` text ,
+  `rate_img` text ,
+  `rate_addr` varchar(64) ,
+  `rate_datetime` varchar(16) ,
+  PRIMARY KEY (`rate_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `shejiben_designer_program` (
+  `designer_id` varchar(64) DEFAULT NULL,
+  `program_id` varchar(64) NOT NULL,
+  `program_name` varchar(64) DEFAULT NULL,
+  `deal_time` varchar(16) DEFAULT NULL,
+  `status` varchar(8) DEFAULT NULL,
+  PRIMARY KEY (`program_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `shejiben_designer_blog` (
+  `designer_id` varchar(64) ,
+  `blog_id` varchar(64) ,
+  `blog_title` varchar(128) ,
+  `blog_datetime` varchar(16) ,
+  `view_number` varchar(8) ,
+  `blog_content` text ,
+  `blog_img` text ,
+  `blog_author` varchar(64) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `shejiben_designer_blog_rate` (
+  `blog_id` int(11) ,
+  `rate_id` int(11) ,
+  `user_head_img` int(11) ,
+  `user_name` int(11) ,
+  `rate_content` int(11) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
