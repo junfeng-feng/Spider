@@ -29,7 +29,7 @@ class RotateUserAgentMiddleware(UserAgentMiddleware):
             
             #设置代理，需要启动tor, polipo
             #参考 http://pkmishra.github.io/blog/2013/03/18/how-to-run-scrapy-with-TOR-and-multiple-browser-agents-part-1-mac/
-            request.meta['proxy'] = settings.get('HTTP_PROXY')
+#             request.meta['proxy'] = settings.get('HTTP_PROXY')
 
     # the default user_agent_list composes chrome,I E,firefox,Mozilla,opera,netscape
     # for more user agent strings,you can find it in http://www.useragentstring.com/pages/useragentstring.php
