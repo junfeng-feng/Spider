@@ -19,7 +19,7 @@ from shejiben.items import ShejibenItem
 logging.basicConfig(level=logging.INFO,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
-                filename='dianping.log',
+                filename='shejiben.log',
                 filemode='a')
 
 class SpiderTmallShop(Spider):
@@ -31,13 +31,13 @@ class SpiderTmallShop(Spider):
 #                     "http://www.shejiben.com/sjs/1466490/",
                   ]
         
-#     count = 0
-#     for id in file("shejiben/spiders/designerid.list"):
-#         count += 1
+    count = 0
+    for id in file("shejiben/spiders/designerid.list"):
+        count += 1
 #         if count > 100:
 #             break
-#         id = id.strip()
-#         start_urls.append("http://www.shejiben.com/sjs/%s/" % (id))
+        id = id.strip()
+        start_urls.append("http://www.shejiben.com/sjs/%s/" % (id))
         
     def __init__(self):
         self.idPatten = re.compile("[0-9]+")
