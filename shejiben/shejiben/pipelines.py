@@ -102,15 +102,24 @@ class ShejibenPipeline(object):
             except Exception, e:
                 print e
         else:
+            if len(item["images"]) > 0:
+                for image in item["images"]:
+                    item["blog_content"] = item["blog_content"].replace(image["url"], "shejiben" + image["path"][4:])
+                    pass
+                
+                item["blog_img"] = ",".join(["shejiben" + image["path"][4:] for image in item["images"]])
+                pass
             try:
                 tx.execute(self.insertDesignerBlogSql,
                        (
-                        item["designer_id"],
-                        item["rate_id"],
-                        item["rate_content"],
-                        item["rate_img"],
-                        item["rate_addr"],
-                        item["rate_datetime"],
+                        item["designer_id"] ,
+                        item["blog_id"] ,
+                        item["blog_title"] ,
+                        item["blog_datetime"] ,
+                        item["view_number"] ,
+                        item["blog_content"] ,
+                        item["blog_img"] ,
+                        item["blog_author"] ,
                         ))
             except Exception, e:
                 print e
