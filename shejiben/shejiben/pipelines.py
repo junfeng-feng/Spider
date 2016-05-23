@@ -15,9 +15,9 @@ class ShejibenPipeline(object):
         VALUES 
         (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         self.insertDesignerRateSql = r"""INSERT INTO `shejiben_designer_rate` 
-        (`designer_id`, `rate_id`, `rate_content`, `rate_img`, `rate_addr`, `rate_datetime`) 
+        (`designer_id`, `rate_id`, `rate_content`, `rate_img`, `rate_addr`, `rate_datetime`,`user_name`,`user_photo`) 
         VALUES 
-        (%s, %s, %s, %s, %s, %s);"""
+        (%s, %s, %s, %s, %s, %s,%s,%s);"""
         self.insertDesignerBlogSql = r"""INSERT INTO `shejiben_designer_blog`
         (`designer_id`, `blog_id`, `blog_title`, `blog_datetime`, `view_number`, `blog_content`, `blog_img`, `blog_author`) 
         VALUES
@@ -85,6 +85,8 @@ class ShejibenPipeline(object):
             except Exception, e:
                 print e
         elif item["flag"] == "rate":
+            if len(item["images"]) > 0:
+                item["user_photo"] = "shejiben" + item["images"][0]["path"][4:]
             try:
                 tx.execute(self.insertDesignerRateSql,
                        (
@@ -94,6 +96,8 @@ class ShejibenPipeline(object):
                         item["rate_img"],
                         item["rate_addr"],
                         item["rate_datetime"],
+                        item["user_name"],
+                        item["user_photo"],
                         ))
             except Exception, e:
                 print e

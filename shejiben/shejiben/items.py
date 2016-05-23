@@ -30,6 +30,8 @@ class ShejibenItem(scrapy.Item):
     rate_img = scrapy.Field()
     rate_addr = scrapy.Field()
     rate_datetime = scrapy.Field()
+    user_name = scrapy.Field()
+    user_photo = scrapy.Field()
     
 
     #设计师博客
