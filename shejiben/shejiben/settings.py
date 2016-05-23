@@ -19,7 +19,7 @@ MYSQL_PASSWD = 'root'
 MYSQL_PORT = 3306
 
 #delay
-# DOWNLOAD_DELAY = 0.01
+DOWNLOAD_DELAY = 0.5
 COOKIES_ENABLES=False
 
 
@@ -29,7 +29,7 @@ COOKIES_ENABLES=False
 IMAGES_STORE = r'./img'
 IMAGES_EXPIRES = 90
 
-# DOWNLOADER_MIDDLEWARES = {  
-#         'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware' : None,  
-#         'dianping.spiders.rotate_useragent.RotateUserAgentMiddleware' :400  
-#     } 
+DOWNLOADER_MIDDLEWARES = {  
+        'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware' : None,  
+        'shejiben.spiders.rotate_useragent.RotateUserAgentMiddleware' :400  
+    } 

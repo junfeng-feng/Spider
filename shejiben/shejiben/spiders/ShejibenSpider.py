@@ -27,13 +27,13 @@ class SpiderTmallShop(Spider):
     
     allowed_domain = ['shiejiben.com']
     start_urls = [
-                "http://www.shejiben.com/sjs/116006/",
+#                 "http://www.shejiben.com/sjs/116006/",
 #                     "http://www.shejiben.com/sjs/1466490/",
                   ]
         
     count = 0
     for id in file("shejiben/spiders/designerid.list"):
-        count += 1
+#         count += 1
 #         if count > 100:
 #             break
         id = id.strip()
@@ -109,6 +109,7 @@ class SpiderTmallShop(Spider):
                 item["designer_id"] = designer_id
                 item["rate_id"] = designer_id + "-" + str(index)
 
+                
                 item["rate_content"] = li.xpath(".//p[@class='com_main_con']/text()").extract()[0].strip()
                 item["rate_addr"] = li.xpath(".//p[@class='com_main_addr']/text()").extract()[0].strip()
                 item["rate_datetime"] = li.xpath(".//span[@class='eva_time']/text()").extract()[0].strip()
@@ -136,7 +137,11 @@ class SpiderTmallShop(Spider):
     def parseDesignerBlogList(self, response):
         designer_id = response.meta["designer_id"]
         select = Selector(response)
-        class_list_num = select.xpath(".//em[@class='class_list_num']/text()").extract()[0]
+        class_list_num = select.xpath(".//em[@class='class_list_num']/text()").extract()
+        if len(class_list_num) == 0:
+            return
+        else:
+            class_list_num = class_list_num[0]
         
         totalBlog = self.idPatten.findall(class_list_num)[0]
         
@@ -166,7 +171,6 @@ class SpiderTmallShop(Spider):
             request.meta["pageNo"] = response.meta["pageNo"]
             yield request
         pass
-    
     def parseBlog(self, response):
         designer_id = response.meta["designer_id"]
 #         self.fw.write(response.url+"\n")
