@@ -53,7 +53,7 @@ class SpiderTmall(Spider):
             paginator = bodyJson["paginator"]
             lastPage = int(paginator["lastPage"])
             currentPage = int(paginator["page"])
-            if currentPage < lastPage and currentPage < 3:#只取前三页的评论数据
+            if currentPage < lastPage and currentPage < 2:  # 只取前三页的评论数据
                 itemId = argsMap["itemId"]
                 sellerId = argsMap["sellerId"]                
                 pageNo = currentPage + 1
@@ -71,7 +71,7 @@ class SpiderTmall(Spider):
                 
                 nickName = rate["displayUserNick"]
                 item["product_id"] = argsMap["itemId"]
-                item["rate_id"] = "rateid-" + str(currentPage * 100 + index + 1)
+                item["rate_id"] = "rateid-" + argsMap["itemId"] + "-" + str(currentPage * 100 + index + 1)
                 item["user_nickname"] = nickName
                 if nickName.find("*") == -1:
                     item["user_name_star_flag"] = 1

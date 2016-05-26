@@ -24,7 +24,7 @@ MYSQL_USER = 'root'
 MYSQL_PASSWD = 'root'
 MYSQL_PORT = 3306
 
-DOWNLOAD_DELAY = 0.1
+DOWNLOAD_DELAY = 0.05
 
 # IMAGES_STORE = r'D:\ProgramingIDE\workspace\SuperSpider\tmallrate\img'
 
