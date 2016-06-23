@@ -40,8 +40,8 @@ class ZhuangyiCompanyPipeline(object):
     def insertTmallShopSql(self, tx, item):
 
         if item["is_designer"] == "yes":
-            image_src = ""
-
+            if len(item["images"]) > 0:
+                item["head_img"] = "zy" + item['images'][0]["path"][4:]
             try:
                 tx.execute(self.insertDesignerSql,
                        (
@@ -58,7 +58,14 @@ class ZhuangyiCompanyPipeline(object):
                 print e
             pass
         else:
-            image_src = ""
+            if len(item["images"]) > 0:
+                item['logo'] = "zy" + item['images'][0]["path"][4:]
+                for image in item["images"][1:]:
+                    url = image["url"][len('http://www.zhuangyi.com'):]
+#                     print url
+                    item["company_des"] = item["company_des"].replace(url, "zy" + image["path"][4:])
+                    pass
+                pass
             
             try:
                 tx.execute(self.insertCompanySql,
