@@ -39,7 +39,10 @@ class ZscompanyPipeline(object):
         return item
     
     def insertTmallShopSql(self, tx, item):
-        logo = item['images'][0]['path']
+        if len(item['images']) >0:
+            logo = item['images'][0]['path']
+        else:
+            logo = ""
         tx.execute(self.insertCompanySql,
                (
                 item["company_id"],
